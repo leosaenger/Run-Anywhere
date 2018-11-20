@@ -1,0 +1,22 @@
+main
+{
+    /* scroll horizontally as needed */
+    overflow-x: auto;
+
+    /* center contents */
+    text-align: center;
+}
+
+main img
+{
+    /* constrain images on small screens */
+    max-width: 100%;
+}
+
+#map
+{
+  position:absolute;
+  top:0;
+  bottom:0;
+  width:100%;
+}
