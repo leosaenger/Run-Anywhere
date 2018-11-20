@@ -28,11 +28,11 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Configure CS50 Library to use SQLite database
-# db = SQL("sqlite:///finance.db")
+db = SQL("sqlite:///runanywhere.db")
 
 
 @app.route("/")
 # @login_required
 def landing():
     """Show landing page"""
-    return(render_template(layout.html))
+    return(render_template("index.html"))
