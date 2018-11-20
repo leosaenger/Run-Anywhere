@@ -5,4 +5,18 @@
 {% endblock %}
 
 {% block main %}
+    <div class="container">
+      <div id='map'></div>
+    </div>
+
+    <script>
+        // Renders a mapbox map
+        mapboxgl.accessToken = 'pk.eyJ1IjoibGVvc2FlbmdlciIsImEiOiJjam9wOGVsczkwa2ZzM3FsMWQxdHc2NHZzIn0.2yb_-4yL8nlzA1eEFjDRKw';
+        const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/leosaenger/cjop8gvrp2yz42ro2xlwzyhhn',
+        center: [-122.403944, 37.784020],
+        zoom: 13.6
+        });
+    </script>
 {% endblock %}
