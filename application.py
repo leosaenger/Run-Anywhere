@@ -7,8 +7,6 @@ from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from helpers import apology, login_required, lookup, usd
-
 # Configure application
 app = Flask(__name__)
 
@@ -30,10 +28,11 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Configure CS50 Library to use SQLite database
-db = SQL("sqlite:///finance.db")
+# db = SQL("sqlite:///finance.db")
 
 
 @app.route("/")
-@login_required
+# @login_required
 def landing():
     """Show landing page"""
+    return(render_template(layout.html))
