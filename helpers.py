@@ -15,7 +15,7 @@ import gpxpy
 import gpxpy.gpx
 
 # Configure OAuth2 access token for authorization: strava_oauth
-swagger_client.configuration.access_token = 'YOUR_ACCESS_TOKEN'
+swagger_client.configuration.access_token = '019e4ad77a1ecbe0112db9b00b3a29f3d9629f8a'
 
 def get_segments(lower, upper):
     '''Accepts lower and upper bounds for an area, and returns a list of ids for nearby segments'''
@@ -59,9 +59,9 @@ def read_gpx():
     # Parses a GPX file, as per documentation of gpxpy
     for track in gpx.tracks:
     for segment in track.segments:
+        route_coords = []
         for point in segment.points:
             # Appends latitude and longitude of each point as a tuple to a list
-            route_coords = []
             route_coords.append((point.latitude, point.longitude))
 
 
