@@ -1,10 +1,14 @@
 # Strava modules
 import time
+import urllib3
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
 import requests
-import urllib.parse
+try:
+    from urllib.parse import urlparse
+except ImportError:
+     from urlparse import urlparse
 
 # Flask session control tools
 from flask import redirect, render_template, request, session
@@ -12,7 +16,10 @@ from functools import wraps
 
 # GPX parser, documentation: https://github.com/tkrajina/gpxpy
 import gpxpy
-import gpxpy.gpx
+try:
+    import gpxpy.gpx
+except ImportError:
+    from gpxpy import gpx
 
 # Configure OAuth2 access token for authorization: strava_oauth
 swagger_client.configuration.access_token = '019e4ad77a1ecbe0112db9b00b3a29f3d9629f8a'
@@ -30,6 +37,7 @@ def get_segments(lower, upper):
         segments = api_instance.exploreSegments(bounds, activityType=activityType)
         # Gets a list of the IDs for segments returned
         segment_ids = [n["id"] for n in segments]
+        print(segment_ids)
         return segment_ids
     except ApiException as e:
         print("Exception when calling SegmentsApi->exploreSegments: %s\n" % e)
