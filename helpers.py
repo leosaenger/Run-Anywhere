@@ -1,4 +1,5 @@
 # Strava modules
+from __future__ import print_function
 import time
 import urllib3
 import swagger_client
@@ -24,13 +25,13 @@ except ImportError:
 # Configure OAuth2 access token for authorization: strava_oauth
 swagger_client.configuration.access_token = '019e4ad77a1ecbe0112db9b00b3a29f3d9629f8a'
 
-def get_segments(lower, upper):
+def get_segments(lowerlat, lowerlong, upperlat, upperlong):
     '''Accepts lower and upper bounds for an area, and returns a list of ids for nearby segments'''
 
     # create an instance of the API class
     api_instance = swagger_client.SegmentsApi()
-    bounds =  [lower, upper]# array[Float] | The latitude and longitude for two points describing a rectangular boundary for the search: [southwest corner latitutde, southwest corner longitude, northeast corner latitude, northeast corner longitude]
-    activityType = running # Get running routes
+    bounds =  [lowerlat, lowerlong, upperlat, upperlong] # array[Float] | The latitude and longitude for two points describing a rectangular boundary for the search: [southwest corner latitutde, southwest corner longitude, northeast corner latitude, northeast corner longitude]
+    activityType = "running" # Get running routes
 
     try:
         # Explore segments
@@ -42,6 +43,7 @@ def get_segments(lower, upper):
     except ApiException as e:
         print("Exception when calling SegmentsApi->exploreSegments: %s\n" % e)
 
+get_segments(42.377003, -71.116661, 42.387596,-71.099495)
 
 def get_gpx(route_id):
     '''Takes a route id and returns a GPX file for that route'''
