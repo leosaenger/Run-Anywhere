@@ -47,7 +47,7 @@ def get_segments(lowerlat, lowerlong, upperlat, upperlong):
     '''Accepts lower and upper bounds for an area, and returns a list of polylines for nearby segments'''
     # EXAMPLE: get_segments(42.377003,-71.116661,42.387596,-71.099495)
 
-    # Specifies a request
+    # Specifies a request, as per http://docs.python-requests.org
     payload = {'bounds': f'{lowerlat},{lowerlong},{upperlat},{upperlong}', 'activity_type': 'running'}
     r = requests.get('https://www.strava.com/api/v3/segments/explore', params=payload, headers=headers)
     # Imports our data as JSON
@@ -58,9 +58,6 @@ def get_segments(lowerlat, lowerlong, upperlat, upperlong):
         polylines.append(n['points'])
     return polylines
 
-
-def get_gpx(route_id):
-    '''Takes a route id and returns a GPX file for that route'''
 
 def read_gpx():
     '''Parses a GPX file and returns a list of coordinates'''
