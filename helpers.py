@@ -2,8 +2,6 @@
 from __future__ import print_function
 import time
 import urllib3
-import swagger_client
-from swagger_client.rest import ApiException
 from pprint import pprint
 import requests
 try:
@@ -22,42 +20,47 @@ try:
 except ImportError:
     from gpxpy import gpx
 
-# Configure OAuth2 access token for authorization: strava_oauth
-swagger_client.configuration.access_token = '019e4ad77a1ecbe0112db9b00b3a29f3d9629f8a'
+# DEBUG: Comment this back in to get detailed error documentation
+# import logging
+#
+# # These two lines enable debugging at httplib level (requests->urllib3->http.client)
+# # You will see the REQUEST, including HEADERS and DATA, and RESPONSE with HEADERS but without DATA.
+# # The only thing missing will be the response.body which is not logged.
+# try:
+#     import http.client as http_client
+# except ImportError:
+#     # Python 2
+#     import httplib as http_client
+# http_client.HTTPConnection.debuglevel = 1
+#
+# # You must initialize logging, otherwise you'll not see debug output.
+# logging.basicConfig()
+# logging.getLogger().setLevel(logging.DEBUG)
+# requests_log = logging.getLogger("requests.packages.urllib3")
+# requests_log.setLevel(logging.DEBUG)
+# requests_log.propagate = True
+
+# Sets our key
+headers = {'Authorization': 'Bearer be211e859f23c0f98bb7c8e3d1c4a13c27dcdbc4'}
 
 def get_segments(lowerlat, lowerlong, upperlat, upperlong):
-    '''Accepts lower and upper bounds for an area, and returns a list of ids for nearby segments'''
+    '''Accepts lower and upper bounds for an area, and returns a list of polylines for nearby segments'''
+    # EXAMPLE: get_segments(42.377003,-71.116661,42.387596,-71.099495)
 
-    # create an instance of the API class
-    api_instance = swagger_client.SegmentsApi()
-    bounds =  [lowerlat, lowerlong, upperlat, upperlong] # array[Float] | The latitude and longitude for two points describing a rectangular boundary for the search: [southwest corner latitutde, southwest corner longitude, northeast corner latitude, northeast corner longitude]
-    activityType = "running" # Get running routes
+    # Specifies a request
+    payload = {'bounds': f'{lowerlat},{lowerlong},{upperlat},{upperlong}', 'activity_type': 'running'}
+    r = requests.get('https://www.strava.com/api/v3/segments/explore', params=payload, headers=headers)
+    # Imports our data as JSON
+    data = r.json()
+    # Iterates over the JSON object returned, taking out polylines
+    polylines = []
+    for n in data['segments']:
+        polylines.append(n['points'])
+    return polylines
 
-    try:
-        # Explore segments
-        segments = api_instance.exploreSegments(bounds, activityType=activityType)
-        # Gets a list of the IDs for segments returned
-        segment_ids = [n["id"] for n in segments]
-        print(segment_ids)
-        return segment_ids
-    except ApiException as e:
-        print("Exception when calling SegmentsApi->exploreSegments: %s\n" % e)
-
-get_segments(42.377003, -71.116661, 42.387596,-71.099495)
 
 def get_gpx(route_id):
     '''Takes a route id and returns a GPX file for that route'''
-
-    # create an instance of the API class
-    api_instance = swagger_client.RoutesApi()
-    id = route_id # Integer, the identifier of the route.
-    try:
-        # Export Route GPX
-        gpx_route = api_instance.getRouteAsGPX(id)
-        return gpx_route
-    except ApiException as e:
-        print("Exception when calling RoutesApi->getRouteAsGPX: %s\n" % e)
-
 
 def read_gpx():
     '''Parses a GPX file and returns a list of coordinates'''
@@ -68,11 +71,11 @@ def read_gpx():
 
     # Parses a GPX file, as per documentation of gpxpy
     for track in gpx.tracks:
-    for segment in track.segments:
-        route_coords = []
-        for point in segment.points:
-            # Appends latitude and longitude of each point as a tuple to a list
-            route_coords.append((point.latitude, point.longitude))
+        for segment in track.segments:
+            route_coords = []
+            for point in segment.points:
+                # Appends latitude and longitude of each point as a tuple to a list
+                route_coords.append((point.latitude, point.longitude))
 
 
 def login_required(f):
