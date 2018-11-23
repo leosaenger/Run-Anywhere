@@ -13,10 +13,10 @@
         // Renders a mapbox map
         mapboxgl.accessToken = 'pk.eyJ1IjoibGVvc2FlbmdlciIsImEiOiJjam9wOGVsczkwa2ZzM3FsMWQxdHc2NHZzIn0.2yb_-4yL8nlzA1eEFjDRKw';
         const map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/leosaenger/cjop8gvrp2yz42ro2xlwzyhhn',
-        center: [-122.403944, 37.784020],
-        zoom: 13.6
+            container: 'map', // References container
+            style: 'mapbox://styles/leosaenger/cjop8gvrp2yz42ro2xlwzyhhn', // Custom styling
+            center: [42.3736, 71.1097], // Centered on Cambridge
+            zoom: 13.6 // Zoom
         });
     </script>
 {% endblock %}
