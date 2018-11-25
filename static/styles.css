@@ -13,10 +13,27 @@ main img
     max-width: 100%;
 }
 
+#map-container {
+    position: relative;
+    width: 50%;
+    height: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5%;
+}
+
 #map
 {
-  position:absolute;
-  top:0;
-  bottom:0;
-  width:100%;
+  position: relative;
+  height: 20vw;
 }
+.geocoder
+{
+        position:relative;
+        z-index:1;
+        width: 50%;
+        margin-left:auto;
+        margin-right:auto;
+        margin-top: auto;
+}
+.mapboxgl-ctrl-geocoder { min-width:100%; }

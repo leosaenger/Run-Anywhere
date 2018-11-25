@@ -68,11 +68,11 @@ def read_gpx():
 
     # Parses a GPX file, as per documentation of gpxpy
     for track in gpx.tracks:
-    for segment in track.segments:
-        route_coords = []
-        for point in segment.points:
-            # Appends latitude and longitude of each point as a tuple to a list
-            route_coords.append((point.latitude, point.longitude))
+        for segment in track.segments:
+            route_coords = []
+            for point in segment.points:
+                # Appends latitude and longitude of each point as a tuple to a list
+                route_coords.append((point.latitude, point.longitude))
 
 
 def login_required(f):

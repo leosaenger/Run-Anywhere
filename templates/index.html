@@ -1,13 +1,15 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Index
+    Run Anywhere
 {% endblock %}
 
 {% block main %}
-    <div class="container">
-      <div id='map'></div>
+
+    <div id="map-container">
+      <div id="map"></div>
     </div>
+    <div id='geocoder' class='geocoder'></div>
 
     <script>
         // Renders a mapbox map
@@ -15,8 +17,22 @@
         const map = new mapboxgl.Map({
             container: 'map', // References container
             style: 'mapbox://styles/leosaenger/cjop8gvrp2yz42ro2xlwzyhhn', // Custom styling
-            center: [42.3736, 71.1097], // Centered on Cambridge
+            center: [-71.116404, 42.374346], // Centered on Cambridge
             zoom: 13.6 // Zoom
         });
+
+        // See user's location
+        map.addControl(new mapboxgl.GeolocateControl({
+          positionOptions: {
+            enableHighAccuracy: true
+          },
+          trackUserLocation: true
+        }));
+
+        var geocoder = new MapboxGeocoder({
+          accessToken: mapboxgl.accessToken
+        });
+
+        document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
     </script>
 {% endblock %}

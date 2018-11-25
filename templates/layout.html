@@ -22,6 +22,8 @@
         <!-- Mapbox styling -->
         <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.js'></script>
         <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.css' rel='stylesheet' />
+        <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.min.js'></script>
+        <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.css' type='text/css' />
 
         <title>{% block title %}{% endblock %}</title>
 
@@ -58,9 +60,7 @@
             </header>
         {% endif %}
 
-        <main class="container p-5">
-            {% block main %}{% endblock %}
-        </main>
+        {% block main %}{% endblock %}
 
         <footer class="small text-center text-muted">
             Run Anywhere is a CS50 Project by Nihal Raman, Leo Saenger, and Jaylen Wang
