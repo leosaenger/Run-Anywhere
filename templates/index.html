@@ -10,13 +10,86 @@
     </div>
 
     <script>
+        // Defines the root of our function, for flexibility
+        // See: http://flask.pocoo.org/docs/1.0/patterns/jquery/
+        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+
         // Renders a mapbox map
         mapboxgl.accessToken = 'pk.eyJ1IjoibGVvc2FlbmdlciIsImEiOiJjam9wOGVsczkwa2ZzM3FsMWQxdHc2NHZzIn0.2yb_-4yL8nlzA1eEFjDRKw';
         const map = new mapboxgl.Map({
             container: 'map', // References container
             style: 'mapbox://styles/leosaenger/cjop8gvrp2yz42ro2xlwzyhhn', // Custom styling
-            center: [42.3736, 71.1097], // Centered on Cambridge
+            center: [42.3736, -71.1097], // Centered on Cambridge
             zoom: 13.6 // Zoom
         });
+
+        // Gets the user's current location, as per: https://developers.google.com/web/fundamentals/native-hardware/user-location/
+        // Humanizes Error messages
+        function humanizeGeolocationErrorMsg(error) {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    return "User denied the request for Geolocation.";
+                case error.POSITION_UNAVAILABLE:
+                    return "Location information is unavailable.";
+                case error.TIMEOUT:
+                    return "The request to get user location timed out.";
+                case error.UNKNOWN_ERROR:
+                    return "An unknown error occurred."
+            }
+        }
+
+        window.onload = function displaylines() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        // Pass to Flask route using AJAX
+                        $.getJSON($SCRIPT_ROOT + '/get_coords', {
+                          lat: position.coords.latitude,
+                          long: position.coords.longitude,
+                        }, function(data) {
+                          coords = data.result;
+                        });
+                        // Add those coordinates to a layer on the map
+                        map.addLayer({
+                            "id": "route",
+                            "type": "line",
+                            "source": {
+                                "type": "geojson",
+                                "data": {
+                                    "type": "Feature",
+                                    "properties": {},
+                                    "geometry": {
+                                        "type": "LineString",
+                                        "coordinates": coords[0]
+                                    }
+                                }
+                            },
+                            "layout": {
+                                "line-join": "round",
+                                "line-cap": "round"
+                            },
+                            "paint": {
+                                "line-color": "#888",
+                                "line-width": 8
+                            }
+                        });
+                    }, function(error) {
+                        handleNotifications(map, map.getCenter(), humanizeGeolocationErrorMsg(error));
+                    }
+                )
+            } else {
+                handleNotifications(map, map.getCenter(), "Your browser doesn't support html5 geolocation");
+            }
+        }
+
+        // window.onload = function() {
+        //   var startPos;
+        //   var geoSuccess = function(position) {
+        //     startPos = position;
+        //     document.getElementById('startLat').innerHTML = startPos.coords.latitude;
+        //     document.getElementById('startLon').innerHTML = startPos.coords.longitude;
+        //   };
+        //   navigator.geolocation.getCurrentPosition(geoSuccess);
+        // };
     </script>
 {% endblock %}

@@ -8,3 +8,4 @@ Flask-Session
 requests
 gpxpy
 urllib3
+polyline

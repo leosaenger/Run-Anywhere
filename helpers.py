@@ -7,18 +7,15 @@ import requests
 try:
     from urllib.parse import urlparse
 except ImportError:
-     from urlparse import urlparse
+    # Python 2
+    from urlparse import urlparse
 
 # Flask session control tools
 from flask import redirect, render_template, request, session
 from functools import wraps
 
-# GPX parser, documentation: https://github.com/tkrajina/gpxpy
-import gpxpy
-try:
-    import gpxpy.gpx
-except ImportError:
-    from gpxpy import gpx
+# Polyline encoding/decoding: https://pypi.org/project/polyline/
+import polyline
 
 # DEBUG: Comment this back in to get detailed error documentation
 # import logging
@@ -54,25 +51,12 @@ def get_segments(lowerlat, lowerlong, upperlat, upperlong):
     data = r.json()
     # Iterates over the JSON object returned, taking out polylines
     polylines = []
-    for n in data['segments']:
-        polylines.append(n['points'])
+    try:
+        for n in data['segments']:
+            polylines.append(n['points'])
+    except KeyError:
+        print("No segments in area!") 
     return polylines
-
-
-def read_gpx():
-    '''Parses a GPX file and returns a list of coordinates'''
-
-    # Opens the GPX file
-    gpx_file = open(gpx_route, 'r')
-    gpx = gpxpy.parse(gpx_file)
-
-    # Parses a GPX file, as per documentation of gpxpy
-    for track in gpx.tracks:
-        for segment in track.segments:
-            route_coords = []
-            for point in segment.points:
-                # Appends latitude and longitude of each point as a tuple to a list
-                route_coords.append((point.latitude, point.longitude))
 
 
 def login_required(f):
