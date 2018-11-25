@@ -57,8 +57,7 @@ def get_segments(lowerlat, lowerlong, upperlat, upperlong):
     except KeyError:
         print("No segments in area!") 
     return polylines
-
-
+  
 def login_required(f):
     """
     Decorate routes to require login.
