@@ -10,16 +10,19 @@ from werkzeug.security import check_password_hash, generate_password_hash
 # Configure application
 app = Flask(__name__)
 
+# Import from helpers
+from helpers import get_segments, login_required
+
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 # Ensure responses aren't cached
-@app.after_request
-def after_request(response):
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    response.headers["Expires"] = 0
-    response.headers["Pragma"] = "no-cache"
-    return response
+# @app.after_request
+# def after_request(response):
+#     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+#     response.headers["Expires"] = 0
+#     response.headers["Pragma"] = "no-cache"
+#     return response
 
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_FILE_DIR"] = mkdtemp()
@@ -35,3 +38,25 @@ db = SQL("sqlite:///runanywhere.db")
 def landing():
     """Show landing page"""
     return(render_template("index.html"))
+
+@app.route("/get_coords", methods=["GET"])
+def get_coords():
+    # Fetch the current latitude and longitude
+    currentlat = request.args.get('lat', 0, type=float)
+    currentlong = request.args.get('long', 0, type=float)
+    # Testing
+    print(currentlat)
+    print(currentlong)
+    # Convert to a square
+    lowerlat = currentlat - 0.005
+    lowerlong = currentlong - 0.005
+    upperlat = currentlat + 0.005
+    upperlong = currentlong + 0.005
+    # Get nearby polylines
+    polyline = get_segments(lowerlat, lowerlong, upperlat, upperlong)
+    # Convert those to a list of coordinates
+    coordinates = []
+    coordinates = [polyline.decode(polyline) for n in polyline]
+    # Then, return those
+    print(coordinates)
+    return coordinates
