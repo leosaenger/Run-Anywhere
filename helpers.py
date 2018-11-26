@@ -21,7 +21,12 @@ import requests
 from stravalib import Client
 
 # Sets our key
-key = '61e15d84599f293dc23a57bb19388453637b9432'
+#key = requests.post("https://www.strava.com/oauth/token", grant_type=refresh_token, refresh_token = "ed64949d3614e9a0574ecba44d5514de593c2c0b")
+client = Client()
+token_response = client.refresh_access_token(client_id=30378,
+                                      client_secret="67b60f8a8c450a837a2337fe9eb57515915d8fba",
+                                      refresh_token="ed64949d3614e9a0574ecba44d5514de593c2c0b")
+key = token_response['access_token']
 
 
 def get_segments(lowerlat, lowerlong, upperlat, upperlong):
@@ -60,10 +65,3 @@ def flip(t):
             r.append(i[::-1])
         g.append(r)
     return g
-
-def refresh_token():
-    info = {
-    grant_type: refresh_token,
-    refresh_token: "ed64949d3614e9a0574ecba44d5514de593c2c0b"
-    }
-    token = requests.post("https://www.strava.com/oauth/token", info = info)
