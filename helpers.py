@@ -21,7 +21,7 @@ import requests
 from stravalib import Client
 
 # Sets our key
-#key = requests.post("https://www.strava.com/oauth/token", grant_type=refresh_token, refresh_token = "ed64949d3614e9a0574ecba44d5514de593c2c0b")
+# https://github.com/hozn/stravalib/blob/master/docs/usage/auth.rst#id5
 client = Client()
 token_response = client.refresh_access_token(client_id=30378,
                                       client_secret="67b60f8a8c450a837a2337fe9eb57515915d8fba",
