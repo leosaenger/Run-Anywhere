@@ -63,31 +63,34 @@
                           long: position.coords.longitude,
                         }, function(data) {
                           var coords = data;
-
-                          console.log(coords[0]);
-                          map.addLayer({
-                              "id": "route",
-                              "type": "line",
-                              "source": {
-                                  "type": "geojson",
-                                  "data": {
-                                      "type": "Feature",
-                                      "properties": {},
-                                      "geometry": {
-                                          "type": "LineString",
-                                          "coordinates": coords[0]
-                                      }
-                                  }
-                              },
-                              "layout": {
-                                  "line-join": "round",
-                                  "line-cap": "round"
-                              },
-                              "paint": {
-                                  "line-color": "#888",
-                                  "line-width": 8
-                              }
-                          });
+                          var i;
+                          for (i = 0; i < coords.length; i++) {
+                            let id = "route" + i;
+                            console.log(coords[i]);
+                            map.addLayer({
+                                "id": id,
+                                "type": "line",
+                                "source": {
+                                    "type": "geojson",
+                                    "data": {
+                                        "type": "Feature",
+                                        "properties": {},
+                                        "geometry": {
+                                            "type": "LineString",
+                                            "coordinates": coords[i]
+                                        }
+                                    }
+                                },
+                                "layout": {
+                                    "line-join": "round",
+                                    "line-cap": "round"
+                                },
+                                "paint": {
+                                    "line-color": "#888",
+                                    "line-width": 8
+                                }
+                            });
+                          }
                         });
 
                         // Add those coordinates to a layer on the map

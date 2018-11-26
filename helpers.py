@@ -57,6 +57,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# Switches order of tuples in an array of array of tuples
 def flip(t):
     g = list()
     for n in t:
