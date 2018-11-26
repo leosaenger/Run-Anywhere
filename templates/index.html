@@ -53,7 +53,6 @@
                     return "An unknown error occurred."
             }
         }
-
         window.onload = function displaylines() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -63,32 +62,36 @@
                           lat: position.coords.latitude,
                           long: position.coords.longitude,
                         }, function(data) {
-                          coords = data.result;
+                          var coords = data;
+
+                          console.log(coords[0])
+                          map.addLayer({
+                              "id": "route",
+                              "type": "line",
+                              "source": {
+                                  "type": "geojson",
+                                  "data": {
+                                      "type": "Feature",
+                                      "properties": {},
+                                      "geometry": {
+                                          "type": "LineString",
+                                          "coordinates": coords[0]
+                                      }
+                                  }
+                              },
+                              "layout": {
+                                  "line-join": "round",
+                                  "line-cap": "round"
+                              },
+                              "paint": {
+                                  "line-color": "#888",
+                                  "line-width": 8
+                              }
+                          });
                         });
+
                         // Add those coordinates to a layer on the map
-                        map.addLayer({
-                            "id": "route",
-                            "type": "line",
-                            "source": {
-                                "type": "geojson",
-                                "data": {
-                                    "type": "Feature",
-                                    "properties": {},
-                                    "geometry": {
-                                        "type": "LineString",
-                                        "coordinates": coords[0]
-                                    }
-                                }
-                            },
-                            "layout": {
-                                "line-join": "round",
-                                "line-cap": "round"
-                            },
-                            "paint": {
-                                "line-color": "#888",
-                                "line-width": 8
-                            }
-                        });
+
                     }, function(error) {
                         handleNotifications(map, map.getCenter(), humanizeGeolocationErrorMsg(error));
                     }

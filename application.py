@@ -50,7 +50,15 @@ def get_coords():
     # Get nearby polylines
     polylines = get_segments(lowerlat, lowerlong, upperlat, upperlong)
     # Convert those to a list of coordinates
-    coordinates = []
     coordinates = [polyline.decode(n) for n in polylines]
+    coordsG = list()
+    for n in coordinates:
+        coordsR = list()
+        for i in n:
+            print(i)
+            print(i[::-1])
+            coordsR.append(i[::-1])
+        coordsG.append(coordsR)
+    print(coordsG)
     # Then, return those
-    return coordinates
+    return jsonify(coordsG)
