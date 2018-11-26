@@ -13,16 +13,11 @@ app = Flask(__name__)
 # Import from helpers
 from helpers import get_segments, login_required
 
+# Polyline decoding
+import polyline
+
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
-
-# Ensure responses aren't cached
-# @app.after_request
-# def after_request(response):
-#     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-#     response.headers["Expires"] = 0
-#     response.headers["Pragma"] = "no-cache"
-#     return response
 
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_FILE_DIR"] = mkdtemp()
@@ -53,10 +48,9 @@ def get_coords():
     upperlat = currentlat + 0.005
     upperlong = currentlong + 0.005
     # Get nearby polylines
-    polyline = get_segments(lowerlat, lowerlong, upperlat, upperlong)
+    polylines = get_segments(lowerlat, lowerlong, upperlat, upperlong)
     # Convert those to a list of coordinates
     coordinates = []
-    coordinates = [polyline.decode(polyline) for n in polyline]
+    coordinates = [polyline.decode(n) for n in polylines]
     # Then, return those
-    print(coordinates)
     return coordinates
