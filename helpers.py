@@ -15,6 +15,7 @@ from functools import wraps
 
 # Polyline encoding/decoding: https://pypi.org/project/polyline/
 import polyline
+import requests
 
 # As per: https://pythonhosted.org/stravalib
 from stravalib import Client
@@ -59,3 +60,10 @@ def flip(t):
             r.append(i[::-1])
         g.append(r)
     return g
+
+def refresh_token():
+    info = {
+    grant_type: refresh_token,
+    refresh_token: "ed64949d3614e9a0574ecba44d5514de593c2c0b"
+    }
+    token = requests.post("https://www.strava.com/oauth/token", info = info)
