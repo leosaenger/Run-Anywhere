@@ -21,7 +21,7 @@ from stravalib import Client
 
 # Sets our key
 key = '2e817e5134aa77e0d28836b55d7519ecc1a1d3d4'
-headers = {'Authorization': f'Bearer {key}'}
+
 
 def get_segments(lowerlat, lowerlong, upperlat, upperlong):
     '''Accepts lower and upper bounds for an area, and returns a list of polylines for nearby segments'''
@@ -36,8 +36,6 @@ def get_segments(lowerlat, lowerlong, upperlat, upperlong):
     for n in range(len(data)):
         polylines.append(data[n].points)
     return polylines
-
-get_segments(42.377003,-71.116661,42.387596,-71.099495)
 
 
 def login_required(f):
