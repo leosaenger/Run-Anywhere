@@ -13,6 +13,9 @@ app = Flask(__name__)
 # Import from helpers
 from helpers import get_segments, login_required
 
+# Polyline decoding
+import polyline
+
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
@@ -45,10 +48,9 @@ def get_coords():
     upperlat = currentlat + 0.005
     upperlong = currentlong + 0.005
     # Get nearby polylines
-    polyline = get_segments(lowerlat, lowerlong, upperlat, upperlong)
+    polylines = get_segments(lowerlat, lowerlong, upperlat, upperlong)
     # Convert those to a list of coordinates
     coordinates = []
-    coordinates = [polyline.decode(n) for n in polyline]
+    coordinates = [polyline.decode(n) for n in polylines]
     # Then, return those
-    print(coordinates)
     return coordinates
