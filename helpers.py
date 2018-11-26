@@ -55,9 +55,9 @@ def get_segments(lowerlat, lowerlong, upperlat, upperlong):
         for n in data['segments']:
             polylines.append(n['points'])
     except KeyError:
-        print("No segments in area!") 
+        print("No segments in area!")
     return polylines
-  
+
 def login_required(f):
     """
     Decorate routes to require login.
@@ -70,3 +70,9 @@ def login_required(f):
             return redirect("/login")
         return f(*args, **kwargs)
     return decorated_function
+
+def refresh_token():
+    info = {grant_type: refresh_token,
+            refresh_token: "ed64949d3614e9a0574ecba44d5514de593c2c0b"}
+    token = requests.post('https://www.strava.com/oauth/token', info=info)
+    return(token)
