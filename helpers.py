@@ -50,3 +50,12 @@ def login_required(f):
             return redirect("/login")
         return f(*args, **kwargs)
     return decorated_function
+
+def flip(t):
+    g = list()
+    for n in t:
+        r = list()
+        for i in n:
+            r.append(i[::-1])
+        g.append(r)
+    return g

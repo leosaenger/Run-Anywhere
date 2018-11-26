@@ -11,7 +11,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 app = Flask(__name__)
 
 # Import from helpers
-from helpers import get_segments, login_required
+from helpers import get_segments, login_required, flip
 
 # Polyline decoding
 import polyline
@@ -51,14 +51,5 @@ def get_coords():
     polylines = get_segments(lowerlat, lowerlong, upperlat, upperlong)
     # Convert those to a list of coordinates
     coordinates = [polyline.decode(n) for n in polylines]
-    coordsG = list()
-    for n in coordinates:
-        coordsR = list()
-        for i in n:
-            print(i)
-            print(i[::-1])
-            coordsR.append(i[::-1])
-        coordsG.append(coordsR)
-    print(coordsG)
     # Then, return those
-    return jsonify(coordsG)
+    return jsonify(flip(coordinates))
