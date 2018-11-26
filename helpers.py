@@ -21,7 +21,7 @@ import requests
 from stravalib import Client
 
 # Sets our key
-key = '2e817e5134aa77e0d28836b55d7519ecc1a1d3d4'
+key = '61e15d84599f293dc23a57bb19388453637b9432'
 
 
 def get_segments(lowerlat, lowerlong, upperlat, upperlong):

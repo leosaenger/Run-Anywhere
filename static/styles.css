@@ -13,7 +13,8 @@ main img
     max-width: 100%;
 }
 
-#map-container {
+#map-container
+{
     position: relative;
     width: 50%;
     height: 100%;
@@ -27,6 +28,7 @@ main img
   position: relative;
   height: 20vw;
 }
+
 .geocoder
 {
         position:relative;
