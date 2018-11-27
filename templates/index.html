@@ -33,11 +33,77 @@
           trackUserLocation: true
         }));
 
+        let routeNum = 0;
+
         var geocoder = new MapboxGeocoder({
           accessToken: mapboxgl.accessToken
         });
 
-        document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
+        map.addControl(geocoder);
+
+        // After the map style has loaded on the page, add a source layer and default
+        // styling for a single point.
+        map.on('load', function() {
+            map.addSource('single-point', {
+                "type": "geojson",
+                "data": {
+                    "type": "FeatureCollection",
+                    "features": []
+                }
+            });
+
+            map.addLayer({
+                "id": "point",
+                "source": "single-point",
+                "type": "circle",
+                "paint": {
+                    "circle-radius": 10,
+                    "circle-color": "#007cbf"
+                }
+            });
+
+            // Listen for the `result` event from the MapboxGeocoder that is triggered when a user
+            // makes a selection and add a symbol that matches the result.
+            geocoder.on('result', function(ev) {
+                map.getSource('single-point').setData(ev.result.geometry);
+                let position = ev.result.geometry.coordinates;
+                $.getJSON($SCRIPT_ROOT + '/get_coords', {
+                  lat: position[1],
+                  long: position[0],
+                }, function(data) {
+                  var coords = data;
+                  var i;
+                  for (i = 0; i < coords.length; i++) {
+                    let id = "route" + routeNum;
+                    routeNum++;
+                    console.log(coords[i]);
+                    map.addLayer({
+                        "id": id,
+                        "type": "line",
+                        "source": {
+                            "type": "geojson",
+                            "data": {
+                                "type": "Feature",
+                                "properties": {},
+                                "geometry": {
+                                    "type": "LineString",
+                                    "coordinates": coords[i]
+                                }
+                            }
+                        },
+                        "layout": {
+                            "line-join": "round",
+                            "line-cap": "round"
+                        },
+                        "paint": {
+                            "line-color": "#888",
+                            "line-width": 8
+                        }
+                    });
+                  }
+                });
+            });
+        });
 
         // Gets the user's current location, as per: https://developers.google.com/web/fundamentals/native-hardware/user-location/
         // Humanizes Error messages
@@ -65,7 +131,8 @@
                           var coords = data;
                           var i;
                           for (i = 0; i < coords.length; i++) {
-                            let id = "route" + i;
+                            let id = "route" + routeNum;
+                            routeNum++;
                             console.log(coords[i]);
                             map.addLayer({
                                 "id": id,
