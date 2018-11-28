@@ -40,6 +40,7 @@ def get_segments(lowerlat, lowerlong, upperlat, upperlong):
     # Returns the object
     return data
 
+pprint(get_segments(42.377003,-71.116661,42.387596,-71.099495))
 
 def login_required(f):
     """
