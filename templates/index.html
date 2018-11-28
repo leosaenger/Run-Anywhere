@@ -186,8 +186,11 @@
                           }
                         });
 
-                        // Add those coordinates to a layer on the map
-
+                        $.getJSON($SCRIPT_ROOT + '/get_routes', {
+                          lat: position.coords.latitude,
+                          long: position.coords.longitude,
+                        }, function(data) {
+                          var routes_list = data;
                     }, function(error) {
                         handleNotifications(map, map.getCenter(), humanizeGeolocationErrorMsg(error));
                     }

@@ -67,5 +67,9 @@ def get_routes():
     upperlong = currentlong + 0.01
     # Get data
     data = get_segments(lowerlat, lowerlong, upperlat, upperlong)
+    # Create a dictionary with those values
+    segments = []
+    for n in range((len(data))):
+        segments.append({'name': data[n].name, 'avg_grade': data[n].avg_grade, 'elev_distance': data[n].elev_distance, 'distance': data[n].distance})
     # Return that list of dictionaries
-    return jsonify(data)
+    return jsonify(segments)
