@@ -39,17 +39,33 @@ def get_coords():
     # Fetch the current latitude and longitude
     currentlat = request.args.get('lat', 0, type=float)
     currentlong = request.args.get('long', 0, type=float)
-    # Testing
-    print(currentlat)
-    print(currentlong)
     # Convert to a square
-    lowerlat = currentlat - 0.005
-    lowerlong = currentlong - 0.005
-    upperlat = currentlat + 0.005
-    upperlong = currentlong + 0.005
-    # Get nearby polylines
-    polylines = get_segments(lowerlat, lowerlong, upperlat, upperlong)
+    lowerlat = currentlat - 0.01
+    lowerlong = currentlong - 0.01
+    upperlat = currentlat + 0.01
+    upperlong = currentlong + 0.01
+    # Get data
+    data = get_segments(lowerlat, lowerlong, upperlat, upperlong)
+    # Iterates over the object returned, taking out polylines
+    polylines = []
+    for n in range(len(data)):
+        polylines.append(data[n].points)
     # Convert those to a list of coordinates
     coordinates = [polyline.decode(n) for n in polylines]
     # Then, return those
     return jsonify(flip(coordinates))
+
+@app.route("/get_routes", methods=["GET"])
+def get_routes():
+    # Fetch the current latitude and longitude
+    currentlat = request.args.get('lat', 0, type=float)
+    currentlong = request.args.get('long', 0, type=float)
+    # Convert to a square
+    lowerlat = currentlat - 0.01
+    lowerlong = currentlong - 0.01
+    upperlat = currentlat + 0.01
+    upperlong = currentlong + 0.01
+    # Get data
+    data = get_segments(lowerlat, lowerlong, upperlat, upperlong)
+    # Return that list of dictionaries
+    return jsonify(data)

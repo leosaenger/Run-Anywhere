@@ -37,11 +37,8 @@ def get_segments(lowerlat, lowerlong, upperlat, upperlong):
     client = Client(access_token=key)
     data = client.explore_segments([lowerlat,lowerlong,upperlat,upperlong], activity_type='running')
 
-    # Iterates over the object returned, taking out polylines
-    polylines = []
-    for n in range(len(data)):
-        polylines.append(data[n].points)
-    return polylines
+    # Returns the object
+    return data
 
 
 def login_required(f):
@@ -57,8 +54,9 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# Switches order of tuples in an array of array of tuples
+
 def flip(t):
+    # Switches order of tuples in an array of array of tuples
     g = list()
     for n in t:
         r = list()
