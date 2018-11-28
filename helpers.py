@@ -37,12 +37,8 @@ def get_segments(lowerlat, lowerlong, upperlat, upperlong):
     client = Client(access_token=key)
     data = client.explore_segments([lowerlat,lowerlong,upperlat,upperlong], activity_type='running')
 
+    # Returns the object
     return data
-    # Iterates over the object returned, taking out polylines
-    polylines = []
-    for n in range(len(data)):
-        polylines.append(data[n].points)
-    return polylines
 
 
 def login_required(f):
