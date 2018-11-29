@@ -222,7 +222,42 @@
                                 }
                             });
                             map.setPaintProperty(id, 'line-opacity', 70 / 100);
+                            if (i != 0) {
+                              let len = coords[i].length - 1;
+                              console.log(len);
+                              let lenpast = coords[i-1].length - 1;
+                              console.log(len);
+                              let endlat = coords[i][len][0];
+                              let endlong = coords[i][len][1];
+                              let startlat = coords[i-1][lenpast][0];
+                              let startlong = coords[i-1][lenpast][1];
+                              let routename = 'routeconnect' + routeNum;
+                              var directionsRequest = 'https://api.mapbox.com/directions/v5/mapbox/walking/' + endlat + ',' + endlong + ';' + startlat + ',' + startlong + '?geometries=geojson&access_token=' + mapboxgl.accessToken;
+                              $.ajax({
+                                method: 'GET',
+                                url: directionsRequest,
+                              }).done(function(data) {
+                                var route = data.routes[0].geometry;
+                                map.addLayer({
+                                  id: routename,
+                                  type: 'line',
+                                  source: {
+                                    type: 'geojson',
+                                    data: {
+                                      type: 'Feature',
+                                      geometry: route
+                                    }
+                                  },
+                                  paint: {
+                                    'line-width': 2
+                                  }
+                                });
+                                // this is where the code from the next step will go
+                              });
+                            }
+
                           }
+
                         });
 
                         $.getJSON($SCRIPT_ROOT + '/get_routes', {
