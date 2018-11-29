@@ -88,7 +88,6 @@
                   for (i = 0; i < coords.length; i++) {
                     let id = "route" + routeNum;
                     routeNum++;
-                    console.log(coords[i]);
                     map.addLayer({
                         "id": id,
                         "type": "line",
@@ -145,8 +144,12 @@
                           var i;
                           for (i = 0; i < coords.length; i++) {
                             let id = "route" + routeNum;
+                            let marker1 = "custom-marker" + routeNum;
+                            let id2 = "markers" + routeNum;
+                            let lat1 = coords[i][0][0];
+                            let long1 = coords[i][0][1];
                             routeNum++;
-                            console.log(coords[i]);
+                            console.log(coords[i][0][0]);
                             var colors = [
                                 '#2C3E50',
                                 '#E74C3C',
@@ -159,6 +162,42 @@
                                 '#3498DB',
                                 '#2980B9'
                             ];
+                            var geojson = {
+                              "type": "FeatureCollection",
+                              "features": [
+                                    {
+                                        "type": "Feature",
+                                        "properties": {
+                                            "message": "Baz",
+                                            "iconSize": [32, 32]
+                                        },
+                                        "geometry": {
+                                            "type": "Point",
+                                            "coordinates": [
+                                                lat1,
+                                                long1
+                                            ]
+                                        }
+                                    }
+                                ]
+                            };
+                            geojson.features.forEach(function(marker) {
+                                // create a DOM element for the marker
+                                var el = document.createElement('div');
+                                el.className = "marker";
+                                el.style.backgroundImage = 'url(https://www.toymaster.co.uk/wp-content/themes/toymaster-2016/a/img/map/marker-red.png)';
+                                el.style.width = marker.properties.iconSize[0] + 'px';
+                                el.style.height = marker.properties.iconSize[1] + 'px';
+
+                                el.addEventListener('click', function() {
+                                    window.alert(marker.properties.message);
+                                });
+
+                                // add marker to map
+                                new mapboxgl.Marker(el)
+                                    .setLngLat(marker.geometry.coordinates)
+                                    .addTo(map);
+                            });
                             map.addLayer({
                                 "id": id,
                                 "type": "line",
@@ -201,6 +240,25 @@
                 handleNotifications(map, map.getCenter(), "Your browser doesn't support html5 geolocation");
             }
         }
+        // map.loadImage('http://maps.google.com/mapfiles/ms/icons/blue-dot.png', function(error, image) {
+        //   if (error) throw error;
+        //   map.addImage("custom-marker", image);
+        //   /* Style layer: A style layer ties together the source and image and specifies how they are displayed on the map. */
+        //   map.addLayer({
+        //     id: "marker",
+        //     type: "symbol",
+        //     /* Source: A data source specifies the geographic coordinate where the image marker gets placed. */
+        //     source: {
+        //       type: "geojson",
+        //       data: {
+        //         type: "FeatureCollection",
+        //         features:[{"type":"Feature","geometry":{"type":"Point","coordinates":["-71.12673", "42.36732"]}}]}
+        //     },
+        //     layout: {
+        //       "icon-image": "custom-marker",
+        //     }
+        //   });
+        // });
 
     </script>
 {% endblock %}

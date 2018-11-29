@@ -20,12 +20,10 @@
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
 
         <!-- Mapbox styling -->
-        <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.js'></script>
-        <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.css' rel='stylesheet' />
         <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.min.js'></script>
         <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.css' type='text/css' />
-
-        <link href="/static/favicon.ico" rel="icon">
+        <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.js'></script>
+        <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.css' rel='stylesheet' />
 
         <title>{% block title %}{% endblock %}</title>
 
@@ -34,10 +32,7 @@
     <body>
 
         <nav class="navbar navbar-expand-md navbar-light bg-light border">
-          <div class="container-fluid">
-            <a class="navbar-brand" href="/">
-              <img src="/static/logo-large.png" width="250" alt=""/>
-            </a>
+            <a class="navbar-brand" href="/">Run Anywhere</a>
             <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbar" data-toggle="collapse" type="button">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -55,7 +50,6 @@
                     </ul>
                 {% endif %}
             </div>
-          </div>
         </nav>
 
         {% if get_flashed_messages() %}
