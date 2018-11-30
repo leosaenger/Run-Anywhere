@@ -40,8 +40,6 @@ def get_segments(lowerlat, lowerlong, upperlat, upperlong):
     # Returns the object
     return data
 
-pprint(get_segments(42.377003,-71.116661,42.387596,-71.099495))
-
 def login_required(f):
     """
     Decorate routes to require login.
@@ -57,11 +55,8 @@ def login_required(f):
 
 
 def flip(t):
-    # Switches order of tuples in an array of array of tuples
-    g = list()
+    # Switches order of tuples in an array of tuples
+    r = list()
     for n in t:
-        r = list()
-        for i in n:
-            r.append(i[::-1])
-        g.append(r)
-    return g
+        r.append(n[::-1])
+    return r
