@@ -83,61 +83,7 @@
             geocoder.on('result', function(ev) {
                 map.getSource('single-point').setData(ev.result.geometry);
                 let position = ev.result.geometry.coordinates;
-                $.getJSON($SCRIPT_ROOT + '/get_routes', {
-                  lat: position[1],
-                  long: position[0],
-                }, function(data) {
-                  // Returns all of our route data for the nearby area
-                  var routes_list = data;
-                  for (var i = 0; i < routes_list.segments.length; i++) {
-                    var coords = []
-                    // Parses that data to get arrays of arrays of coordinate pairs
-                    for (var j = 0; j < routes_list.segments.length; j++) {
-                      coords.push(routes_list.segments[j].points);
-                    }
-                    // Dictionary of colors, for spice
-                    var colors = [
-                        '#2C3E50',
-                        '#E74C3C',
-                        '#ECF0F1',
-                        '#3498DB',
-                        '#2980B9',
-                        '#2C3E50',
-                        '#E74C3C',
-                        '#ECF0F1',
-                        '#3498DB',
-                        '#2980B9'
-                    ];
-                    // Keep track of which route we're on
-                    let id = "route" + routeNum;
-                    routeNum++;
-                    // Graph each route nearby
-                    map.addLayer({
-                        "id": id,
-                        "type": "line",
-                        "source": {
-                            "type": "geojson",
-                            "data": {
-                                "type": "Feature",
-                                "properties": {},
-                                "geometry": {
-                                    "type": "LineString",
-                                    "coordinates": coords[i]
-                                }
-                            }
-                        },
-                        "layout": {
-                            "line-join": "round",
-                            "line-cap": "round"
-                        },
-                        "paint": {
-                            "line-color": colors[i],
-                            "line-width": 4
-                        }
-                    });
-                    map.setPaintProperty(id, 'line-opacity', 70 / 100);
-                  }
-                });
+                drawRoute(position[0], position[1]);
             });
         });
 
@@ -162,148 +108,7 @@
                     // Once we have the user's position
                     function(position) {
                         // Pass to Flask route using AJAX
-                        $.getJSON($SCRIPT_ROOT + '/get_routes', {
-                          lat: position.coords.latitude,
-                          long: position.coords.longitude,
-                        }, function(data) {
-                          var routes_list = data;
-                          for (var i = 0; i < routes_list.segments.length; i++) {
-                            var name = routes_list.segments[i].name;
-                            var avg_grade = routes_list.segments[i].avg_grade;
-                            var elev_difference = routes_list.segments[i].elev_difference;
-                            var distance = routes_list.segments[i].distance;
-                            var coords = []
-                            for (var j = 0; j < routes_list.segments.length; j++) {
-                              coords.push(routes_list.segments[j].points);
-                            }
-                            // Keep track of which route we're on
-                            let id = "route" + routeNum;
-                            let marker1 = "custom-marker" + routeNum;
-                            let id2 = "markers" + routeNum;
-                            // Keep track of start lat and long, for connecting routes
-                            let lat1 = coords[i][0][0];
-                            let long1 = coords[i][0][1];
-                            routeNum++;
-                            // Dict of colors to iterate through
-                            var colors = [
-                                '#2C3E50',
-                                '#E74C3C',
-                                '#ECF0F1',
-                                '#3498DB',
-                                '#2980B9',
-                                '#2C3E50',
-                                '#E74C3C',
-                                '#ECF0F1',
-                                '#3498DB',
-                                '#2980B9'
-                            ];
-                            // Map each coordinate set
-                            map.addLayer({
-                                "id": id,
-                                "type": "line",
-                                "source": {
-                                    "type": "geojson",
-                                    "data": {
-                                        "type": "Feature",
-                                        "properties": {},
-                                        "geometry": {
-                                            "type": "LineString",
-                                            "coordinates": coords[i]
-                                        }
-                                    }
-                                },
-                                "layout": {
-                                    "line-join": "round",
-                                    "line-cap": "round"
-                                },
-                                "paint": {
-                                    "line-color": colors[i],
-                                    "line-width": 4
-                                }
-                            });
-                            // Define a marker at each route head
-                            var geojson = {
-                              "type": "FeatureCollection",
-                              "features": [
-                                    {
-                                        "type": "Feature",
-                                        "properties": {
-                                            "message": "Baz",
-                                            "iconSize": [32, 32]
-                                        },
-                                        "geometry": {
-                                            "type": "Point",
-                                            "coordinates": [
-                                                lat1,
-                                                long1
-                                            ]
-                                        }
-                                    }
-                                ]
-                            };
-                            // Define the data within each marker
-                            geojson.features.forEach(function(marker) {
-                                // create a DOM element for the marker
-                                var el = document.createElement('div');
-                                el.className = "marker";
-                                el.style.backgroundImage = 'url(https://www.toymaster.co.uk/wp-content/themes/toymaster-2016/a/img/map/marker-red.png)';
-                                el.style.width = marker.properties.iconSize[0] + 'px';
-                                el.style.height = marker.properties.iconSize[1] + 'px';
-
-                                //el.addEventListener('click', function() {
-                                //    window.alert(marker.properties.message);
-                                //});
-
-                                // add marker to map
-                                new mapboxgl.Marker(el)
-                                    .setLngLat(marker.geometry.coordinates)
-                                    .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
-                                    .setHTML('<h5>' + name + '</h5><p>' +
-                                      'Elevation Difference: ' + elev_difference + '</p><p>' +
-                                      'Distance: ' + distance + '</p><p>'+
-                                      'Average Grade: ' + avg_grade + '</p>'))
-                                    .addTo(map);
-                            });
-                            // Set the opacity a bit lower
-                            map.setPaintProperty(id, 'line-opacity', 70 / 100);
-                            // If we have more than one route, connect them
-                            if (i != 0) {
-                              // Define needed data for connecting
-                              let len = coords[i].length - 1;
-                              let lenpast = coords[i-1].length - 1;
-                              let endlat = coords[i][len][0];
-                              let endlong = coords[i][len][1];
-                              let startlat = coords[i-1][lenpast][0];
-                              let startlong = coords[i-1][lenpast][1];
-                              let routename = 'routeconnect' + routeNum;
-                              // Get the connector
-                              var directionsRequest = 'https://api.mapbox.com/directions/v5/mapbox/walking/' + endlat + ',' + endlong + ';' + startlat + ',' + startlong + '?geometries=geojson&access_token=' + mapboxgl.accessToken;
-                              // AJAX the route data from mapbox
-                              $.ajax({
-                                method: 'GET',
-                                url: directionsRequest,
-                              }).done(function(data) {
-                                // Display the route between each
-                                var route = data.routes[0].geometry;
-                                map.addLayer({
-                                  id: routename,
-                                  type: 'line',
-                                  source: {
-                                    type: 'geojson',
-                                    data: {
-                                      type: 'Feature',
-                                      geometry: route
-                                    }
-                                  },
-                                  paint: {
-                                    'line-width': 2
-                                  }
-                                });
-                                // this is where the code from the next step will go
-                              });
-                            }
-                          }
-                        });
+                        drawRoute(position.coords.latitude, position.coords.longitude);
                     }, function(error) {
                         handleNotifications(map, map.getCenter(), humanizeGeolocationErrorMsg(error));
                     }
@@ -313,39 +118,151 @@
             }
         }
 
-        // function get_routes() {
-        //   $.getJSON($SCRIPT_ROOT + '/get_routes', {
-        //   }, function(data) {
-        //     var routes_list = data;
-        //     for (var i = 0; i < routes_list.segments.length; i++) {
-        //       var segment = routes_list.segments[i].name;
-        //       var name = routes_list.segments[i].name;
-        //       var avg_grade = routes_list.segments[i].avg_grade;
-        //       var elev_difference = routes_list.segments[i].elev_difference;
-        //       var distance = routes_list.segments[i].distance;
-        //     }
-        //   });
-        // }
+        // Draws routes with two given points
+        function drawRoute(point1, point2)
+        {
+          $.getJSON($SCRIPT_ROOT + '/get_routes', {
+            lat: point1,
+            long: point2,
+          }, function(data) {
+            var routes_list = data;
+            for (var i = 0; i < routes_list.segments.length; i++) {
+              var name = routes_list.segments[i].name;
+              var avg_grade = routes_list.segments[i].avg_grade;
+              var elev_difference = routes_list.segments[i].elev_difference;
+              var distance = routes_list.segments[i].distance;
+              var coords = []
+              for (var j = 0; j < routes_list.segments.length; j++) {
+                coords.push(routes_list.segments[j].points);
+              }
+              // Keep track of which route we're on
+              let id = "route" + routeNum;
+              let marker1 = "custom-marker" + routeNum;
+              let id2 = "markers" + routeNum;
+              // Keep track of start lat and long, for connecting routes
+              let lat1 = coords[i][0][0];
+              let long1 = coords[i][0][1];
+              routeNum++;
+              // Dict of colors to iterate through
+              var colors = [
+                  '#2C3E50',
+                  '#E74C3C',
+                  '#ECF0F1',
+                  '#3498DB',
+                  '#2980B9',
+                  '#2C3E50',
+                  '#E74C3C',
+                  '#ECF0F1',
+                  '#3498DB',
+                  '#2980B9'
+              ];
+              // Map each coordinate set
+              map.addLayer({
+                  "id": id,
+                  "type": "line",
+                  "source": {
+                      "type": "geojson",
+                      "data": {
+                          "type": "Feature",
+                          "properties": {},
+                          "geometry": {
+                              "type": "LineString",
+                              "coordinates": coords[i]
+                          }
+                      }
+                  },
+                  "layout": {
+                      "line-join": "round",
+                      "line-cap": "round"
+                  },
+                  "paint": {
+                      "line-color": colors[i],
+                      "line-width": 4
+                  }
+              });
+              // Define a marker at each route head
+              var geojson = {
+                "type": "FeatureCollection",
+                "features": [
+                      {
+                          "type": "Feature",
+                          "properties": {
+                              "message": "Baz",
+                              "iconSize": [32, 32]
+                          },
+                          "geometry": {
+                              "type": "Point",
+                              "coordinates": [
+                                  lat1,
+                                  long1
+                              ]
+                          }
+                      }
+                  ]
+              };
+              // Define the data within each marker
+              geojson.features.forEach(function(marker) {
+                  // create a DOM element for the marker
+                  var el = document.createElement('div');
+                  el.className = "marker";
+                  el.style.backgroundImage = 'url(https://www.toymaster.co.uk/wp-content/themes/toymaster-2016/a/img/map/marker-red.png)';
+                  el.style.width = marker.properties.iconSize[0] + 'px';
+                  el.style.height = marker.properties.iconSize[1] + 'px';
 
-        // map.loadImage('http://maps.google.com/mapfiles/ms/icons/blue-dot.png', function(error, image) {
-        //   if (error) throw error;
-        //   map.addImage("custom-marker", image);
-        //   /* Style layer: A style layer ties together the source and image and specifies how they are displayed on the map. */
-        //   map.addLayer({
-        //     id: "marker",
-        //     type: "symbol",
-        //     /* Source: A data source specifies the geographic coordinate where the image marker gets placed. */
-        //     source: {
-        //       type: "geojson",
-        //       data: {
-        //         type: "FeatureCollection",
-        //         features:[{"type":"Feature","geometry":{"type":"Point","coordinates":["-71.12673", "42.36732"]}}]}
-        //     },
-        //     layout: {
-        //       "icon-image": "custom-marker",
-        //     }
-        //   });
-        // });
+                  //el.addEventListener('click', function() {
+                  //    window.alert(marker.properties.message);
+                  //});
+
+                  // add marker to map
+                  new mapboxgl.Marker(el)
+                      .setLngLat(marker.geometry.coordinates)
+                      .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
+                      .setHTML('<h5>' + name + '</h5><p>' +
+                        'Elevation Difference: ' + elev_difference + '</p><p>' +
+                        'Distance: ' + distance + '</p><p>'+
+                        'Average Grade: ' + avg_grade + '</p>'))
+                      .addTo(map);
+              });
+              // Set the opacity a bit lower
+              map.setPaintProperty(id, 'line-opacity', 70 / 100);
+              // If we have more than one route, connect them
+              if (i != 0) {
+                // Define needed data for connecting
+                let len = coords[i].length - 1;
+                let lenpast = coords[i-1].length - 1;
+                let endlat = coords[i][len][0];
+                let endlong = coords[i][len][1];
+                let startlat = coords[i-1][lenpast][0];
+                let startlong = coords[i-1][lenpast][1];
+                let routename = 'routeconnect' + routeNum;
+                // Get the connector
+                var directionsRequest = 'https://api.mapbox.com/directions/v5/mapbox/walking/' + endlat + ',' + endlong + ';' + startlat + ',' + startlong + '?geometries=geojson&access_token=' + mapboxgl.accessToken;
+                // AJAX the route data from mapbox
+                $.ajax({
+                  method: 'GET',
+                  url: directionsRequest,
+                }).done(function(data) {
+                  // Display the route between each
+                  var route = data.routes[0].geometry;
+                  map.addLayer({
+                    id: routename,
+                    type: 'line',
+                    source: {
+                      type: 'geojson',
+                      data: {
+                        type: 'Feature',
+                        geometry: route
+                      }
+                    },
+                    paint: {
+                      'line-width': 2
+                    }
+                  });
+                });
+              }
+            }
+          });
+        }
 
         document.getElementById('listing-group').addEventListener('change', function(e) {
             var handler = e.target.id;

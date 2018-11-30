@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Register
+{% endblock %}
+
+{% block main %}
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <form action="/register" method="post">
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" name="username" placeholder="Username" type="text">
+        </div>
+        <div class="form-group">
+          <input class="form-control" name="password" placeholder="Password" type="password">
+        </div>
+        <div class="form-group">
+            <input class="form-control" name="confirmation" placeholder="Please type your password again" type="password">
+        </div>
+        <button class="btn btn-primary" type="submit">Register</button>
+    </form>
+    <script>
+    //I got this javascript code from the TF walkthrough at Monday office hours
+    //document.querySelector('form').onsubmit = function(e) {
+      //  e.preventDefault();
+        //$.get("/check", {username: document.querySelector('input[name = username]').value}, function(response){
+          //  if(response){
+            //    document.querySelector('form').submit();
+          //  }
+            //else{
+            //    alert("That username is already in use!");
+            //}
+        //});
+    //};
+    </script>
+{% endblock %}
