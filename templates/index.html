@@ -75,7 +75,7 @@
             geocoder.on('result', function(ev) {
                 map.getSource('single-point').setData(ev.result.geometry);
                 let position = ev.result.geometry.coordinates;
-                drawRoute(position[0], position[1]);
+                drawRoute(position[1], position[0]);
             });
         });
         // Gets the user's current location, as per: https://developers.google.com/web/fundamentals/native-hardware/user-location/
@@ -197,9 +197,6 @@
                   el.style.backgroundImage = 'url(https://www.toymaster.co.uk/wp-content/themes/toymaster-2016/a/img/map/marker-red.png)';
                   el.style.width = marker.properties.iconSize[0] + 'px';
                   el.style.height = marker.properties.iconSize[1] + 'px';
-                  //el.addEventListener('click', function() {
-                  //    window.alert(marker.properties.message);
-                  //});
                   // add marker to map
                   new mapboxgl.Marker(el)
                       .setLngLat(marker.geometry.coordinates)
