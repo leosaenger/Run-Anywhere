@@ -6,7 +6,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions
 from werkzeug.security import check_password_hash, generate_password_hash
-from pymsgbox import *
+#from pymsgbox import *
 
 # Configure application
 app = Flask(__name__)
@@ -76,18 +76,6 @@ def get_coords():
     # Then, return those
     return jsonify(flip(coordinates))
 
-# This function is a work in progress
-@app.route("/save_route", methods=["GET", "POST"])
-def save_route():
-    """Register user"""
-    rows = db.execute("INSERT INTO routes(route, user_id) users WHERE id = :i", i=session['user_id'])
-            cash = int(rows[0]["cash"])
-
-        # Remember which user has logged in
-        for row in rows:
-            session["user_id"] = row["id"]
-
-
 @app.route("/get_routes", methods=["GET"])
 def get_routes():
     print("called get_routes")
@@ -96,6 +84,18 @@ def get_routes():
         data = json.load(file)
         file.close()
         return jsonify(data)
+
+# This function is a work in progress
+@app.route("/save_route", methods=["GET", "POST"])
+def save_route():
+    """Register user"""
+    rows = db.execute("INSERT INTO routes(route, user_id) users WHERE id = :i", i=session['user_id'])
+
+        # Remember which user has logged in
+    for row in rows:
+        session["user_id"] = row["id"]
+
+
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
