@@ -189,13 +189,15 @@
                                 el.style.width = marker.properties.iconSize[0] + 'px';
                                 el.style.height = marker.properties.iconSize[1] + 'px';
 
-                                el.addEventListener('click', function() {
-                                    window.alert(marker.properties.message);
-                                });
+                                //el.addEventListener('click', function() {
+                                //    window.alert(marker.properties.message);
+                                //});
 
                                 // add marker to map
                                 new mapboxgl.Marker(el)
                                     .setLngLat(marker.geometry.coordinates)
+                                    .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
+                                    .setHTML('<h3>' + "Route" + '</h3><p>' + "This is part of your route" + '</p>'))
                                     .addTo(map);
                             });
                             map.addLayer({
@@ -275,6 +277,7 @@
                 handleNotifications(map, map.getCenter(), "Your browser doesn't support html5 geolocation");
             }
         }
+
         // map.loadImage('http://maps.google.com/mapfiles/ms/icons/blue-dot.png', function(error, image) {
         //   if (error) throw error;
         //   map.addImage("custom-marker", image);
