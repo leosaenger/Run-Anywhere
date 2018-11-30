@@ -37,7 +37,7 @@
         const map = new mapboxgl.Map({
             container: 'map', // References container
             style: 'mapbox://styles/leosaenger/cjop8gvrp2yz42ro2xlwzyhhn', // Custom styling
-            center: [-71.116404, 42.374346], // Centered on Cambridge
+            center: [-71.116404, 42.374346], // Centered on Cambridge by default
             zoom: 13.6 // Zoom
         });
 
@@ -147,6 +147,7 @@
                     return "An unknown error occurred."
             }
         }
+
         window.onload = function displaylines() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -205,13 +206,15 @@
                                 el.style.width = marker.properties.iconSize[0] + 'px';
                                 el.style.height = marker.properties.iconSize[1] + 'px';
 
-                                el.addEventListener('click', function() {
-                                    window.alert(marker.properties.message);
-                                });
+                                //el.addEventListener('click', function() {
+                                //    window.alert(marker.properties.message);
+                                //});
 
                                 // add marker to map
                                 new mapboxgl.Marker(el)
                                     .setLngLat(marker.geometry.coordinates)
+                                    .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
+                                    .setHTML('<h3>' + "Route" + '</h3><p>' + "This is part of your route" + '</p>'))
                                     .addTo(map);
                             });
                             map.addLayer({
@@ -273,16 +276,8 @@
                             }
 
                           }
-
                         });
 
-                        $.getJSON($SCRIPT_ROOT + '/get_routes', {
-                          lat: position.coords.latitude,
-                          long: position.coords.longitude,
-                        }, function(data) {
-                          var routes_list = data;
-                        }
-                      );
                     }, function(error) {
                         handleNotifications(map, map.getCenter(), humanizeGeolocationErrorMsg(error));
                     }
@@ -291,6 +286,24 @@
                 handleNotifications(map, map.getCenter(), "Your browser doesn't support html5 geolocation");
             }
         }
+
+<<<<<<< HEAD
+        // Gets the data
+        $.getJSON($SCRIPT_ROOT + '/get_routes', {
+        }, function(data) {
+          console.log('flag 1');
+          var routes_list = data;
+          console.log(routes_list);
+          var i;
+          for (i = 0; i < coords.length; i++) {
+            console.log('listen up');
+            console.log(routes_list[i].get('name'));
+            // $("#name").text(routes_list[i].get('name'));
+          }
+        });
+
+=======
+>>>>>>> e6444ae03197c7dd72b01c294b2dd1acf217dd27
         // map.loadImage('http://maps.google.com/mapfiles/ms/icons/blue-dot.png', function(error, image) {
         //   if (error) throw error;
         //   map.addImage("custom-marker", image);
