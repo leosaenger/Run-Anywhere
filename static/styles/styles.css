@@ -13,20 +13,21 @@ main img
     max-width: 100%;
 }
 
-.splash
-{
-    background-image: url(/static/splash.png);
-    min-height : 100%;
-    min-width : 100%;
-    background-size:100% 150%;
-    background-size: cover;                      /* <------ */
-    background-repeat: no-repeat;
-    background-position: center center;              /* optional, center the image */
+.bgimg-1 {
+  background-image: url(/static/splash.png);
+  height: 100%;
+  width: 100%;
+  position: relative;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
-#button {
-  text-align: center;
-  }
+.centered {
+    position: absolute;
+    /* top: 50%; */
+    left: 45%;
+    transform: translate(100%, 1300%);
+}
 
 #map-container {
     position: relative;
@@ -48,7 +49,6 @@ p {
   animation-name: slidein;
   animation-iteration-count: infinite;
 }
-
 
 .geocoder
 {

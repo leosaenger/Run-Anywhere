@@ -39,6 +39,12 @@ db = SQL("sqlite:///runanywhere.db")
 # @login_required
 def landing():
     """Show landing page"""
+    return(render_template("splash.html"))
+
+@app.route("/map")
+# @login_required
+def map():
+    """Show landing page"""
     return(render_template("index.html"))
 
 @app.route("/get_routes", methods=["GET"])
