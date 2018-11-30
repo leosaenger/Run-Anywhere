@@ -16,6 +16,13 @@ from helpers import get_segments, login_required, flip
 # Polyline decoding
 import polyline
 
+# Data storage
+import json
+from units import LeafUnit
+
+def leafunit_reduce(self):
+    return LeafUnit, (self.specifier, self.is_si())
+
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
@@ -46,7 +53,18 @@ def get_coords():
     upperlong = currentlong + 0.01
     # Get data
     data = get_segments(lowerlat, lowerlong, upperlat, upperlong)
-    # Iterates over the object returned, taking out polylines
+    # Parse the data into a JSON object
+    seg_data = {}
+    seg_data['segments'] = []
+    for n in range((len(data))):
+        seg_data['segments'].append({'name': data[n].name, 'avg_grade': data[n].avg_grade,
+                                    'elev_difference': str(data[n].elev_difference.__dict__['_num']) + str(data[n].elev_difference.__dict__['_unit']),
+                                    'distance': str(data[n].distance.__dict__['_num']) + str(data[n].distance.__dict__['_unit'])})
+    # Save data
+    with open('./routes-data.json', 'w') as file:
+        json.dump(seg_data, file)
+        file.close()
+    # Iterates over the original object returned, taking out polylines
     polylines = []
     for n in range(len(data)):
         polylines.append(data[n].points)
@@ -57,19 +75,9 @@ def get_coords():
 
 @app.route("/get_routes", methods=["GET"])
 def get_routes():
-    # Fetch the current latitude and longitude
-    currentlat = request.args.get('lat', 0, type=float)
-    currentlong = request.args.get('long', 0, type=float)
-    # Convert to a square
-    lowerlat = currentlat - 0.01
-    lowerlong = currentlong - 0.01
-    upperlat = currentlat + 0.01
-    upperlong = currentlong + 0.01
-    # Get data
-    data = get_segments(lowerlat, lowerlong, upperlat, upperlong)
-    # Create a dictionary with those values
-    segments = []
-    for n in range((len(data))):
-        segments.append({'name': data[n].name, 'avg_grade': data[n].avg_grade, 'elev_distance': data[n].elev_distance, 'distance': data[n].distance})
-    # Return that list of dictionaries
-    return jsonify(segments)
+    print("called get_routes")
+    # Fetch data from earlier call
+    with open('./routes-data.json', 'r') as file:
+        data = json.load(file)
+        file.close()
+        return jsonify(data)
