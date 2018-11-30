@@ -10,3 +10,4 @@ gpxpy
 urllib3
 polyline
 stravalib
+gunicorn
