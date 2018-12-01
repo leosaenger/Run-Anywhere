@@ -169,44 +169,40 @@
                       "line-width": 4
                   }
               });
-              // Define a marker at each route head
-              var geojson = {
-                "type": "FeatureCollection",
-                "features": [
-                      {
-                          "type": "Feature",
-                          "properties": {
-                              "message": "Baz",
-                              "iconSize": [32, 32]
-                          },
-                          "geometry": {
-                              "type": "Point",
-                              "coordinates": [
-                                  lat1,
-                                  long1
-                              ]
-                          }
-                      }
-                  ]
-              };
-              // Define the data within each marker
-              geojson.features.forEach(function(marker) {
-                  // create a DOM element for the marker
-                  var el = document.createElement('div');
-                  el.className = "marker";
-                  el.style.backgroundImage = 'url(https://www.toymaster.co.uk/wp-content/themes/toymaster-2016/a/img/map/marker-red.png)';
-                  el.style.width = marker.properties.iconSize[0] + 'px';
-                  el.style.height = marker.properties.iconSize[1] + 'px';
-                  // add marker to map
-                  new mapboxgl.Marker(el)
-                      .setLngLat(marker.geometry.coordinates)
-                      .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
-                      .setHTML('<h5>' + name + '</h5><p>' +
-                        'Elevation Difference: ' + elev_difference + '</p><p>' +
-                        'Distance: ' + distance + '</p><p>'+
-                        'Average Grade: ' + avg_grade + '</p>'))
-                      .addTo(map);
-              });
+              // // Define a marker at each route head
+              // var geojson = {
+              //   type: 'FeatureCollection',
+              //   features: [{
+              //     type: 'Feature',
+              //     geometry: {
+              //       type: 'Point',
+              //       coordinates: [lat1, long1],
+              //     }
+              //   }]
+              // };
+              // // Define the data within each marker
+              // geojson.features.forEach(function(marker) {
+              //   // create a HTML element for each feature
+              //   var el = document.createElement('div');
+              //   el.className = 'marker';
+              //
+              //   // make a marker for each feature and add to the map
+              //   let marker1 = new mapboxgl.Marker(el)
+              //   marker1.setLngLat(marker.geometry.coordinates)
+              //   marker1.setOffset([0, -16])
+              //   var meme = marker1.getOffset()
+              //   marker1.addTo(map);
+              //   console.log(meme);
+              //     // add marker to map
+              //   new mapboxgl.Marker(el)
+              //       .setLngLat(marker.geometry.coordinates)
+              //       .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
+              //       .setHTML('<h5>' + name + '</h5><p>' +
+              //         'Elevation Difference: ' + elev_difference + '</p><p>' +
+              //         'Distance: ' + distance + '</p><p>'+
+              //         'Average Grade: ' + avg_grade + '</p>'))
+              //       .addTo(map);
+              // });
               // Set the opacity a bit lower
               map.setPaintProperty(id, 'line-opacity', 70 / 100);
               // If we have more than one route, connect them
@@ -244,14 +240,74 @@
                   });
                 });
               }
+
+              let iconid = "places" + routeNum;
+
+              map.addLayer({
+                "id": iconid,
+                "type": "symbol",
+                "source": {
+                    "type": "geojson",
+                    "data": {
+                        "type": "FeatureCollection",
+                        "features": [{
+                            "type": "Feature",
+                            "properties": {
+                                "description": '<h5>' + name + '</h5><p>' +
+                                        'Elevation Difference: ' + elev_difference + '</p><p>' +
+                                        'Distance: ' + distance + '</p><p>'+
+                                        'Average Grade: ' + avg_grade + '</p>',
+                                "icon": "marker"
+                            },
+                            "geometry": {
+                                "type": "Point",
+                                "coordinates": [lat1, long1]
+                            }
+                        }]
+                    }
+                },
+                "layout": {
+                    "icon-image": "{icon}-15",
+                    "icon-allow-overlap": true
+                }
+            });
+            map.on('click', iconid, function (e) {
+                var coordinates = e.features[0].geometry.coordinates.slice();
+                var description = e.features[0].properties.description;
+
+                // Ensure that if the map is zoomed out such that multiple
+                // copies of the feature are visible, the popup appears
+                // over the copy being pointed to.
+                while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                }
+
+                new mapboxgl.Popup()
+                    .setLngLat(coordinates)
+                    .setHTML(description)
+                    .addTo(map);
+            });
+
+            // Change the cursor to a pointer when the mouse is over the places layer.
+            map.on('mouseenter', iconid, function () {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+
+            // Change it back to a pointer when it leaves.
+            map.on('mouseleave', iconid, function () {
+                map.getCanvas().style.cursor = '';
+            });
             }
           });
         }
+
         document.getElementById('listing-group').addEventListener('change', function(e) {
             var handler = e.target.id;
             if (e.target.checked && handler === 'showRoutes') {
                 console.log("huh");
             }
         });
+
+
     </script>
 {% endblock %}
