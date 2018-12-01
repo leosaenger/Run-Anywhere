@@ -47,69 +47,16 @@
           trackUserLocation: true
         }));
         let routeNum = 0;
-        var geocoder = new MapboxGeocoder({
-          accessToken: mapboxgl.accessToken
-        });
-        map.addControl(geocoder);
-        // After the map style has loaded on the page, add a source layer and default
-        // styling for a single point.
-        map.on('load', function() {
-            map.addSource('single-point', {
-                "type": "geojson",
-                "data": {
-                    "type": "FeatureCollection",
-                    "features": []
-                }
-            });
-            map.addLayer({
-                "id": "point",
-                "source": "single-point",
-                "type": "circle",
-                "paint": {
-                    "circle-radius": 10,
-                    "circle-color": "#007cbf"
-                }
-            });
-            // Listen for the `result` event from the MapboxGeocoder that is triggered when a user
-            // makes a selection and add a symbol that matches the result.
-            geocoder.on('result', function(ev) {
-                map.getSource('single-point').setData(ev.result.geometry);
-                let position = ev.result.geometry.coordinates;
-                drawRoute(position[1], position[0]);
-            });
-        });
-        // Gets the user's current location, as per: https://developers.google.com/web/fundamentals/native-hardware/user-location/
-        // Humanizes Error messages
-        function humanizeGeolocationErrorMsg(error) {
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    return "User denied the request for Geolocation.";
-                case error.POSITION_UNAVAILABLE:
-                    return "Location information is unavailable.";
-                case error.TIMEOUT:
-                    return "The request to get user location timed out.";
-                case error.UNKNOWN_ERROR:
-                    return "An unknown error occurred."
-            }
-        }
-        window.onload = function displaylines() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    // Once we have the user's position
-                    function(position) {
-                        // Pass to Flask route using AJAX
-                        drawRoute(position.coords.latitude, position.coords.longitude);
-                    }, function(error) {
-                        handleNotifications(map, map.getCenter(), humanizeGeolocationErrorMsg(error));
-                    }
-                )
-            } else {
-                handleNotifications(map, map.getCenter(), "Your browser doesn't support html5 geolocation");
-            }
-        }
-        // Draws routes with two given points
+        let layers = [];
+
         function drawRoute(point1, point2)
         {
+          for(let i = 0; i < layers.length; i++)
+          {
+            console.log(layers[i]);
+            map.setLayoutProperty(layers[i], 'visibility', 'none');
+          }
+          console.log("DRAWN ROUTE");
           $.getJSON($SCRIPT_ROOT + '/get_routes', {
             lat: point1,
             long: point2,
@@ -169,6 +116,7 @@
                       "line-width": 4
                   }
               });
+              layers.push(id);
               // // Define a marker at each route head
               // var geojson = {
               //   type: 'FeatureCollection',
@@ -238,6 +186,7 @@
                       'line-width': 2
                     }
                   });
+                  layers.push(routename);
                 });
               }
 
@@ -270,7 +219,8 @@
                     "icon-image": "{icon}-15",
                     "icon-allow-overlap": true
                 }
-            });
+              });
+              layers.push(iconid);
             map.on('click', iconid, function (e) {
                 var coordinates = e.features[0].geometry.coordinates.slice();
                 var description = e.features[0].properties.description;
@@ -300,6 +250,75 @@
             }
           });
         }
+
+        var geocoder = new MapboxGeocoder({
+          accessToken: mapboxgl.accessToken
+        });
+        map.addControl(geocoder);
+        // After the map style has loaded on the page, add a source layer and default
+        // styling for a single point.
+        map.on('load', function() {
+            map.addSource('single-point', {
+                "type": "geojson",
+                "data": {
+                    "type": "FeatureCollection",
+                    "features": []
+                }
+            });
+            map.addLayer({
+                "id": "point",
+                "source": "single-point",
+                "type": "circle",
+                "paint": {
+                    "circle-radius": 10,
+                    "circle-color": "#007cbf"
+                }
+            });
+            // Listen for the `result` event from the MapboxGeocoder that is triggered when a user
+            // makes a selection and add a symbol that matches the result.
+            let lastGeocode = "";
+            geocoder.on('result', function(ev) {
+              if(ev.result.center.toString() !== lastGeocode){
+                map.getSource('single-point').setData(ev.result.geometry);
+                let position = ev.result.geometry.coordinates;
+                console.log("GEOCODED");
+                drawRoute(position[1], position[0]);
+              }
+
+              lastGeocode = ev.result.center.toString();
+            });
+        });
+        // Gets the user's current location, as per: https://developers.google.com/web/fundamentals/native-hardware/user-location/
+        // Humanizes Error messages
+        function humanizeGeolocationErrorMsg(error) {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    return "User denied the request for Geolocation.";
+                case error.POSITION_UNAVAILABLE:
+                    return "Location information is unavailable.";
+                case error.TIMEOUT:
+                    return "The request to get user location timed out.";
+                case error.UNKNOWN_ERROR:
+                    return "An unknown error occurred."
+            }
+        }
+        window.onload = function displaylines() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    // Once we have the user's position
+                    function(position) {
+                        // Pass to Flask route using AJAX
+                        drawRoute(position.coords.latitude, position.coords.longitude);
+                    }, function(error) {
+                        handleNotifications(map, map.getCenter(), humanizeGeolocationErrorMsg(error));
+                    }
+                )
+            } else {
+                handleNotifications(map, map.getCenter(), "Your browser doesn't support html5 geolocation");
+            }
+        }
+        // Draws routes with two given points
+
 
         document.getElementById('listing-group').addEventListener('change', function(e) {
             var handler = e.target.id;
