@@ -51,12 +51,15 @@
 
         function drawRoute(point1, point2)
         {
+          let eachLayer = [];
           for(let i = 0; i < layers.length; i++)
           {
             console.log(layers[i]);
-            map.setLayoutProperty(layers[i], 'visibility', 'none');
+            for(let j = 0; j < layers[i].length; j++)
+            {
+              map.setLayoutProperty(layers[i][j], 'visibility', 'none');
+            }
           }
-          console.log("DRAWN ROUTE");
           $.getJSON($SCRIPT_ROOT + '/get_routes', {
             lat: point1,
             long: point2,
@@ -116,7 +119,7 @@
                       "line-width": 4
                   }
               });
-              layers.push(id);
+              eachLayer.push(id);
               // // Define a marker at each route head
               // var geojson = {
               //   type: 'FeatureCollection',
@@ -186,7 +189,7 @@
                       'line-width': 2
                     }
                   });
-                  layers.push(routename);
+                  eachLayer.push(routename);
                 });
               }
 
@@ -220,7 +223,7 @@
                     "icon-allow-overlap": true
                 }
               });
-              layers.push(iconid);
+              eachLayer.push(iconid);
             map.on('click', iconid, function (e) {
                 var coordinates = e.features[0].geometry.coordinates.slice();
                 var description = e.features[0].properties.description;
@@ -249,6 +252,7 @@
             });
             }
           });
+          layers.push(eachLayer);
         }
 
         var geocoder = new MapboxGeocoder({
@@ -281,7 +285,6 @@
               if(ev.result.center.toString() !== lastGeocode){
                 map.getSource('single-point').setData(ev.result.geometry);
                 let position = ev.result.geometry.coordinates;
-                console.log("GEOCODED");
                 drawRoute(position[1], position[0]);
               }
 
