@@ -61,9 +61,9 @@ def get_coords():
     data = get_segments(lowerlat, lowerlong, upperlat, upperlong)
     # Parse the data into a JSON object
     seg_data = {}
-    seg_data['segments'] = []
+    seg_data['data'] = []
     for n in range((len(data))):
-        seg_data['segments'].append({'name': data[n].name,
+        seg_data['data'].append({'name': data[n].name,
                                     'avg_grade': data[n].avg_grade,
                                     # We have to extract the elevation difference and distance from the returned object
                                     'elev_difference': str(data[n].elev_difference.__dict__['_num']) + ' ' + str(data[n].elev_difference.__dict__['_unit']),

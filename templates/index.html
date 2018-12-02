@@ -5,27 +5,45 @@
 {% endblock %}
 
 {% block main %}
-
-    <div id="map-container">
-      <div id="map"></div>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-6">
+          <div id="map-container">
+            <div id="map"></div>
+          </div>
+          <div id='geocoder' class='geocoder'></div>
+          <nav id='listing-group' class='listing-group'>
+            <input type='checkbox' id='showRoutes' checked='checked'>
+            <label for='showRoutes'>Show nearby routes</label>
+            <input type='checkbox' id='boxZoom' checked='checked'>
+            <label for='boxZoom'>Box zoom</label>
+            <input type='checkbox' id='dragRotate' checked='checked'>
+            <label for='dragRotate'>Drag rotate</label>
+            <input type='checkbox' id='dragPan' checked='checked'>
+            <label for='dragPan'>Drag pan</label>
+            <input type='checkbox' id='keyboard' checked='checked'>
+            <label for='keyboard'>Keyboard</label>
+            <input type='checkbox' id='doubleClickZoom' checked='checked'>
+            <label for='doubleClickZoom'>Double click zoom</label>
+            <input type='checkbox' id='touchZoomRotate' checked='checked'>
+            <label for='touchZoomRotate'>Touch zoom rotate</label>
+          </nav>
+        </div>
+        <div class="col-md-auto">
+          <table id="routes_list" class="display" width="100%">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Average Grade</th>
+                <th>Elevation Difference</th>
+                <th>Distance</th>
+                <th>Select Route</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+      </div>
     </div>
-    <div id='geocoder' class='geocoder'></div>
-    <nav id='listing-group' class='listing-group'>
-        <input type='checkbox' id='showRoutes' checked='checked'>
-        <label for='showRoutes'>Show nearby routes</label>
-        <input type='checkbox' id='boxZoom' checked='checked'>
-        <label for='boxZoom'>Box zoom</label>
-        <input type='checkbox' id='dragRotate' checked='checked'>
-        <label for='dragRotate'>Drag rotate</label>
-        <input type='checkbox' id='dragPan' checked='checked'>
-        <label for='dragPan'>Drag pan</label>
-        <input type='checkbox' id='keyboard' checked='checked'>
-        <label for='keyboard'>Keyboard</label>
-        <input type='checkbox' id='doubleClickZoom' checked='checked'>
-        <label for='doubleClickZoom'>Double click zoom</label>
-        <input type='checkbox' id='touchZoomRotate' checked='checked'>
-        <label for='touchZoomRotate'>Touch zoom rotate</label>
-    </nav>
 
     <script>
         // Defines the root of our function, for flexibility
@@ -65,14 +83,42 @@
             long: point2,
           }, function(data) {
             var routes_list = data;
-            for (var i = 0; i < routes_list.segments.length; i++) {
-              var name = routes_list.segments[i].name;
-              var avg_grade = routes_list.segments[i].avg_grade;
-              var elev_difference = routes_list.segments[i].elev_difference;
-              var distance = routes_list.segments[i].distance;
+            // Initialize a table with the data, anonymous function
+            (function(){
+
+              // Creates table
+              var table = $('#routes_list').DataTable({
+                processing: true,
+                "data": data.data,
+                "columns": [
+                  { "data": "name" },
+                  { "data": "avg_grade" },
+                  { "data": "elev_difference" },
+                  { "data": "distance" },
+                  {
+                      "targets": -1,
+                      "data": null,
+                      "defaultContent": "<button type='button' class='btn btn-secondary'>Select Route</button>"
+                  }
+                ],
+              });
+
+              // Adding a button
+              $('#routes_list tbody').on( 'click', 'button', function () {
+                  var data = table.row( $(this).parents('tr') ).data();
+                  alert(data.name);
+                  console.log(data.points);
+              });
+            })();
+            // Parse through the data
+            for (var i = 0; i < routes_list.data.length; i++) {
+              var name = routes_list.data[i].name;
+              var avg_grade = routes_list.data[i].avg_grade;
+              var elev_difference = routes_list.data[i].elev_difference;
+              var distance = routes_list.data[i].distance;
               var coords = []
-              for (var j = 0; j < routes_list.segments.length; j++) {
-                coords.push(routes_list.segments[j].points);
+              for (var j = 0; j < routes_list.data.length; j++) {
+                coords.push(routes_list.data[j].points);
               }
               // Keep track of which route we're on
               let id = "route" + routeNum;
@@ -296,15 +342,16 @@
         function humanizeGeolocationErrorMsg(error) {
             switch(error.code) {
                 case error.PERMISSION_DENIED:
-                    return "User denied the request for Geolocation.";
+                    console.log("User denied the request for Geolocation.");
                 case error.POSITION_UNAVAILABLE:
-                    return "Location information is unavailable.";
+                    console.log("Location information is unavailable.");
                 case error.TIMEOUT:
-                    return "The request to get user location timed out.";
+                    console.log("The request to get user location timed out.");
                 case error.UNKNOWN_ERROR:
-                    return "An unknown error occurred."
+                    console.log("An unknown error occurred.");
             }
         }
+
         window.onload = function displaylines() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -332,4 +379,5 @@
 
 
     </script>
+
 {% endblock %}
