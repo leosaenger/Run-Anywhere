@@ -157,7 +157,7 @@ function drawRoute(point1, point2)
                     selected_routes = JSON.parse(req_up.responseText).data;
                     // Alert user
                     bootbox.alert({
-                        title: selected_routes.length + " routes stored in route builder",
+                        message: selected_routes.length + " routes stored in route builder",
                         backdrop: true,
                         size: 'small'
                     });
