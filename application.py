@@ -72,3 +72,75 @@ def get_coords():
                                     'points': flip(polyline.decode(data[n].points))})
     # Then, return those
     return jsonify(seg_data)
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    """Register user"""
+    if request.method == "POST":
+        # Checking for valid inputs
+        if not request.form.get("username") or not request.form.get("password") or not request.form.get("confirmation"):
+            return render_template("error.html")
+        if request.form.get("password") != request.form.get("confirmation"):
+            return render_template("error.html")
+        # Hashing the password
+        hash = generate_password_hash(request.form.get("password"))
+        result = db.execute("INSERT INTO users(username, hash) VALUES(:u, :h)",
+                    u = request.form.get("username"), h = hash)
+
+        if not result:
+            return render_template("error.html")
+        rows = db.execute("SELECT * FROM users WHERE username = :username",
+                          username=request.form.get("username"))
+
+        # Remember which user has logged in
+        for row in rows:
+            session["user_id"] = row["id"]
+
+        # Redirect user to home page
+        return redirect("/map")
+    else:
+        return render_template("register.html")
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    """Log user in"""
+    # Forget any user_id
+    session.clear()
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+        # Ensure username was submitted
+        if not request.form.get("username"):
+            return render_template("error.html")
+
+        # Ensure password was submitted
+        elif not request.form.get("password"):
+            return render_template("error.html")
+
+        # Query database for username
+        rows = db.execute("SELECT * FROM users WHERE username = :username",
+                          username=request.form.get("username").lower())
+
+        # Ensure username exists and password is correct
+        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
+            return render_template("error.html")
+
+        # Remember which user has logged in
+        for row in rows:
+            session["user_id"] = row["id"]
+
+        # Redirect user to home page
+        return redirect("/map")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    """Log user out"""
+
+    # Forget any user_id
+    session.clear()
+
+    # Redirect user to login form
+    return redirect("/")
