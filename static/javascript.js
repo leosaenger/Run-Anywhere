@@ -241,15 +241,14 @@ function drawRoute(point1, point2)
       // If we have more than one route, connect them
       if (i != 0) {
         // Define needed data for connecting
-        let len = coords[i].length - 1;
         let lenpast = coords[i-1].length - 1;
-        let endlat = coords[i][len][0];
-        let endlong = coords[i][len][1];
+        let endlat = coords[i][0][0];
+        let endlong = coords[i][0][1];
         let startlat = coords[i-1][lenpast][0];
         let startlong = coords[i-1][lenpast][1];
         let routename = 'routeconnect' + routeNum;
         // Get the connector
-        var directionsRequest = 'https://api.mapbox.com/directions/v5/mapbox/walking/' + endlat + ',' + endlong + ';' + startlat + ',' + startlong + '?geometries=geojson&access_token=' + mapboxgl.accessToken;
+        var directionsRequest = 'https://api.mapbox.com/directions/v5/mapbox/walking/' + startlat + ',' + startlong + ';' + endlat + ',' + endlong + '?geometries=geojson&access_token=' + mapboxgl.accessToken;
         // AJAX the route data from mapbox
         $.ajax({
           method: 'GET',
@@ -402,15 +401,14 @@ function custom_route()
     // If we have more than one route, connect them
     if (i != 0) {
       // Define needed data for connecting
-      let len = coords[i].length - 1;
       let lenpast = coords[i-1].length - 1;
-      let endlat = coords[i][len][0];
-      let endlong = coords[i][len][1];
+      let endlat = coords[i][0][0];
+      let endlong = coords[i][0][1];
       let startlat = coords[i-1][lenpast][0];
       let startlong = coords[i-1][lenpast][1];
       let routename = 'routeconnect' + routeNum;
       // Get the connector
-      var directionsRequest = 'https://api.mapbox.com/directions/v5/mapbox/walking/' + endlat + ',' + endlong + ';' + startlat + ',' + startlong + '?geometries=geojson&access_token=' + mapboxgl.accessToken;
+      var directionsRequest = 'https://api.mapbox.com/directions/v5/mapbox/walking/' + startlat + ',' + startlong + ';' + endlat + ',' + endlong + '?geometries=geojson&access_token=' + mapboxgl.accessToken;
       // AJAX the route data from mapbox
       $.ajax({
         method: 'GET',
