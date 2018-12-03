@@ -122,7 +122,11 @@ function drawRoute(point1, point2)
                 // Save our bin_id for current session
                 bin_id = response.id;
                 // Alert the user
-                alert("1 route stored in route builder");
+                bootbox.alert({
+                    message: "1 route stored in routebuilder",
+                    backdrop: true,
+                    size: "small"
+                });
               }
             };
 
@@ -152,7 +156,11 @@ function drawRoute(point1, point2)
                     // Store our selected routes, for later use
                     selected_routes = JSON.parse(req_up.responseText).data;
                     // Alert user
-                    alert(selected_routes.length + " routes stored in route builder");
+                    bootbox.alert({
+                        title: selected_routes.length + " routes stored in route builder",
+                        backdrop: true,
+                        size: 'small'
+                    });
                   }
                 };
 
