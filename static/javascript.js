@@ -6,14 +6,14 @@ called routes.
 
 // Remember JSON Data storage
 // See: https://jsonbin.io/api-reference
-var bin_id;
+let bin_id;
 // Remember selected_routes
-var selected_routes;
+let selected_routes;
 // Remember if a DataTable exists
-var table;
+let table;
 
 // Dict of colors to iterate through
-var colors = [
+let colors = [
   '#e74c3c',
   '#3498db',
   '#2980b9',
@@ -25,6 +25,12 @@ var colors = [
   '#ea2e49',
   '#e74c3c'
 ];
+
+// letiable to make each ID unique
+let routeNum = 0;
+
+// Array that keeps track of the layers being added to the map so the layers can be hidden/shown
+let layers = [];
 
 // Renders a mapbox map
 mapboxgl.accessToken = 'pk.eyJ1IjoibGVvc2FlbmdlciIsImEiOiJjam9wOGVsczkwa2ZzM3FsMWQxdHc2NHZzIn0.2yb_-4yL8nlzA1eEFjDRKw';
@@ -43,8 +49,6 @@ map.addControl(new mapboxgl.GeolocateControl({
   },
   trackUserLocation: true
 }));
-let routeNum = 0;
-let layers = [];
 
 /*
 Takes in lat and long and draws nearby routes on a mapbox element using those two.
@@ -52,26 +56,31 @@ Initializes a DataTable with route data.
 */
 function drawRoute(point1, point2)
 {
+  // Array that contains the layers being added to the map from each drawRoute calle
+  // this array is then added to the "layers" array
   let eachLayer = [];
+
+  // Whenever a user searches for routes in a new location it hides the layers that were displayed before
   for(let i = 0; i < layers.length; i++)
   {
-    console.log(layers[i]);
     for(let j = 0; j < layers[i].length; j++)
     {
       map.setLayoutProperty(layers[i][j], 'visibility', 'none');
     }
   }
+
+  // Gets nearby routes using the strava API
   $.getJSON($SCRIPT_ROOT + '/get_routes', {
     lat: point1,
     long: point2,
   }, function(data) {
-    var routes_list = data;
+    let routes_list = data;
 
     // Initialize a table with the data, using an anonymous function
     (function(){
 
       // Creates table
-      var table = $('#routes_list').DataTable({
+      let table = $('#routes_list').DataTable({
         // Make sure to destroy the table if it exists
         destroy: true,
         processing: true,
@@ -105,10 +114,10 @@ function drawRoute(point1, point2)
       // Adds a button to the end of each row
       $('#routes_list tbody').on('click', 'button', function() {
           // Initializes the data stored
-          var data = table.row($(this).parents('tr')).data();
+          let data = table.row($(this).parents('tr')).data();
 
           // Stringify JSON to send to server
-          var data_str = JSON.stringify(data);
+          let data_str = JSON.stringify(data);
 
           // If we haven't done so, create a JSON bin
           if (!bin_id) {
@@ -165,7 +174,7 @@ function drawRoute(point1, point2)
                 };
 
                 // Concatonates old and new JSON objects
-                var jsons = new Array();
+                let jsons = new Array();
                 // If there's only one list item, concatonate into a new object like so
                 if (current_data.hasOwnProperty('name')) {
                   jsons.push(current_data);
@@ -173,14 +182,14 @@ function drawRoute(point1, point2)
                 }
                 // Else, we have to iterate through the already existing object first
                 else {
-                  for (var n = 0; n < current_data.length; n++) {
+                  for (let n = 0; n < current_data.length; n++) {
                     jsons.push(current_data[n]);
                   }
                   // Only after that can we add our end data
                   jsons.push(data);
                 }
                 // Finally, make this something we can handle
-                var new_str = JSON.stringify(jsons);
+                let new_str = JSON.stringify(jsons);
 
                 // Update bin
                 req_up.open("PUT", "https://api.jsonbin.io/b/" + bin_id, true);
@@ -202,23 +211,29 @@ function drawRoute(point1, point2)
     })();
 
     // Parse through the data
-    for (var i = 0; i < routes_list.data.length; i++) {
-      var name = routes_list.data[i].name;
-      var avg_grade = routes_list.data[i].avg_grade;
-      var elev_difference = routes_list.data[i].elev_difference;
-      var distance = routes_list.data[i].distance;
-      var coords = []
-      for (var j = 0; j < routes_list.data.length; j++) {
+    for (let i = 0; i < routes_list.data.length; i++) {
+      // Variables used to store data about the route
+      let name = routes_list.data[i].name;
+      let avg_grade = routes_list.data[i].avg_grade;
+      let elev_difference = routes_list.data[i].elev_difference;
+      let distance = routes_list.data[i].distance;
+
+      // Create an array that stores all the points in a route
+      let coords = []
+      for (let j = 0; j < routes_list.data.length; j++) {
         coords.push(routes_list.data[j].points);
       }
-      // Keep track of which route we're on
+
+      // These variables give each route/marker a unique id
       let id = "route" + routeNum;
-      let marker1 = "custom-marker" + routeNum;
-      let id2 = "markers" + routeNum;
+
       // Keep track of start lat and long, for connecting routes
       let lat1 = coords[i][0][0];
       let long1 = coords[i][0][1];
+
+      // Increment routeNum to make each id unique
       routeNum++;
+
       // Map each coordinate set
       map.addLayer({
           "id": id,
@@ -243,10 +258,14 @@ function drawRoute(point1, point2)
               "line-width": 4
           }
       });
+
+      // Adds the layer's id into eachLayer array
       eachLayer.push(id);
+
       // Set the opacity a bit lower
       map.setPaintProperty(id, 'line-opacity', 70 / 100);
-      // If we have more than one route, connect them
+
+      // Connects the end of a route to the start of the next route
       if (i != 0) {
         // Define needed data for connecting
         let lenpast = coords[i-1].length - 1;
@@ -255,15 +274,17 @@ function drawRoute(point1, point2)
         let startlat = coords[i-1][lenpast][0];
         let startlong = coords[i-1][lenpast][1];
         let routename = 'routeconnect' + routeNum;
+
         // Get the connector
-        var directionsRequest = 'https://api.mapbox.com/directions/v5/mapbox/walking/' + startlat + ',' + startlong + ';' + endlat + ',' + endlong + '?geometries=geojson&access_token=' + mapboxgl.accessToken;
+        let directionsRequest = 'https://api.mapbox.com/directions/v5/mapbox/walking/' + startlat + ',' + startlong + ';' + endlat + ',' + endlong + '?geometries=geojson&access_token=' + mapboxgl.accessToken;
+
         // AJAX the route data from mapbox
         $.ajax({
           method: 'GET',
           url: directionsRequest,
         }).done(function(data) {
           // Display the route between each
-          var route = data.routes[0].geometry;
+          let route = data.routes[0].geometry;
           map.addLayer({
             id: routename,
             type: 'line',
@@ -278,12 +299,16 @@ function drawRoute(point1, point2)
               'line-width': 2
             }
           });
+
+          // Adds the routename into the eachLayer array
           eachLayer.push(routename);
         });
       }
 
+      // Gives each icon a unique id
       let iconid = "places" + routeNum;
 
+      // Adds an icon at the start of each route
       map.addLayer({
         "id": iconid,
         "type": "symbol",
@@ -312,35 +337,41 @@ function drawRoute(point1, point2)
             "icon-allow-overlap": true
         }
       });
+
+      // Adds the iconid into the eachLayer array
       eachLayer.push(iconid);
-    map.on('click', iconid, function (e) {
-        var coordinates = e.features[0].geometry.coordinates.slice();
-        var description = e.features[0].properties.description;
 
-        // Ensure that if the map is zoomed out such that multiple
-        // copies of the feature are visible, the popup appears
-        // over the copy being pointed to.
-        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-            coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-        }
+      // Displays information about the route when the icon is clicked
+      map.on('click', iconid, function (e) {
+          let coordinates = e.features[0].geometry.coordinates.slice();
+          let description = e.features[0].properties.description;
 
-        new mapboxgl.Popup()
-            .setLngLat(coordinates)
-            .setHTML(description)
-            .addTo(map);
-    });
+          // Ensure that if the map is zoomed out such that multiple
+          // copies of the feature are visible, the popup appears
+          // over the copy being pointed to.
+          while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+              coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+          }
 
-    // Change the cursor to a pointer when the mouse is over the places layer.
-    map.on('mouseenter', iconid, function () {
-        map.getCanvas().style.cursor = 'pointer';
-    });
+          new mapboxgl.Popup()
+              .setLngLat(coordinates)
+              .setHTML(description)
+              .addTo(map);
+      });
 
-    // Change it back to a pointer when it leaves.
-    map.on('mouseleave', iconid, function () {
-        map.getCanvas().style.cursor = '';
-    });
+      // Change the cursor to a pointer when the mouse is over the places layer.
+      map.on('mouseenter', iconid, function () {
+          map.getCanvas().style.cursor = 'pointer';
+      });
+
+      // Change it back to a pointer when it leaves.
+      map.on('mouseleave', iconid, function () {
+          map.getCanvas().style.cursor = '';
+      });
     }
   });
+
+  // Adds the eachLayer array into the overall layers array for organization
   layers.push(eachLayer);
 }
 
@@ -351,34 +382,45 @@ user input and strings together routes that have been selected.
 */
 function custom_route()
 {
-  var routes_list = selected_routes;
+  // Variable to store the routes that have been selected
+  let routes_list = selected_routes;
+
+  // Array to store the layers being added to hide them later
   let eachLayer = [];
+
+  // Hides any layers that are currently being shown
   for(let i = 0; i < layers.length; i++)
   {
-    console.log(layers[i]);
     for(let j = 0; j < layers[i].length; j++)
     {
       map.setLayoutProperty(layers[i][j], 'visibility', 'none');
     }
   }
+
   // Parse through the data
-  for (var i = 0; i < routes_list.length; i++) {
-    var name = routes_list[i].name;
-    var avg_grade = routes_list[i].avg_grade;
-    var elev_difference = routes_list[i].elev_difference;
-    var distance = routes_list[i].distance;
-    var coords = []
-    for (var j = 0; j < routes_list.length; j++) {
+  for (let i = 0; i < routes_list.length; i++) {
+    // Variables to store data about the routes
+    let name = routes_list[i].name;
+    let avg_grade = routes_list[i].avg_grade;
+    let elev_difference = routes_list[i].elev_difference;
+    let distance = routes_list[i].distance;
+
+    // An array that stores the points in the route
+    let coords = []
+    for (let j = 0; j < routes_list.length; j++) {
       coords.push(routes_list[j].points);
     }
-    // Keep track of which route we're on
+
+    // Give each route a unique id
     let id = "route" + routeNum;
-    let marker1 = "custom-marker" + routeNum;
-    let id2 = "markers" + routeNum;
+
     // Keep track of start lat and long, for connecting routes
     let lat1 = coords[i][0][0];
     let long1 = coords[i][0][1];
+
+    // increment routeNum to make each id unique
     routeNum++;
+
     // Map each coordinate set
     map.addLayer({
         "id": id,
@@ -403,10 +445,14 @@ function custom_route()
             "line-width": 4
         }
     });
+
+    // Adds the layer's id to eachLayer array
     eachLayer.push(id);
+
     // Set the opacity a bit lower
     map.setPaintProperty(id, 'line-opacity', 70 / 100);
-    // If we have more than one route, connect them
+
+    // Connects the end of a route to the start of the next route
     if (i != 0) {
       // Define needed data for connecting
       let lenpast = coords[i-1].length - 1;
@@ -415,15 +461,17 @@ function custom_route()
       let startlat = coords[i-1][lenpast][0];
       let startlong = coords[i-1][lenpast][1];
       let routename = 'routeconnect' + routeNum;
+
       // Get the connector
-      var directionsRequest = 'https://api.mapbox.com/directions/v5/mapbox/walking/' + startlat + ',' + startlong + ';' + endlat + ',' + endlong + '?geometries=geojson&access_token=' + mapboxgl.accessToken;
+      let directionsRequest = 'https://api.mapbox.com/directions/v5/mapbox/walking/' + startlat + ',' + startlong + ';' + endlat + ',' + endlong + '?geometries=geojson&access_token=' + mapboxgl.accessToken;
+
       // AJAX the route data from mapbox
       $.ajax({
         method: 'GET',
         url: directionsRequest,
       }).done(function(data) {
         // Display the route between each
-        var route = data.routes[0].geometry;
+        let route = data.routes[0].geometry;
         map.addLayer({
           id: routename,
           type: 'line',
@@ -438,12 +486,16 @@ function custom_route()
             'line-width': 2
           }
         });
+
+        // Adds routename into the eachLayer arrray
         eachLayer.push(routename);
       });
     }
 
+    // Give each icon a unique id
     let iconid = "places" + routeNum;
 
+    // Adds icons to the start of each route
     map.addLayer({
       "id": iconid,
       "type": "symbol",
@@ -472,40 +524,46 @@ function custom_route()
           "icon-allow-overlap": true
       }
     });
+
+    // Adds iconid into the eachLayer array
     eachLayer.push(iconid);
-  map.on('click', iconid, function (e) {
-      var coordinates = e.features[0].geometry.coordinates.slice();
-      var description = e.features[0].properties.description;
 
-      // Ensure that if the map is zoomed out such that multiple
-      // copies of the feature are visible, the popup appears
-      // over the copy being pointed to.
-      while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-          coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-      }
+    // When an icon is clicked it displays a popup with information about the route
+    map.on('click', iconid, function (e) {
+        let coordinates = e.features[0].geometry.coordinates.slice();
+        let description = e.features[0].properties.description;
 
-      new mapboxgl.Popup()
-          .setLngLat(coordinates)
-          .setHTML(description)
-          .addTo(map);
-  });
+        // Ensure that if the map is zoomed out such that multiple
+        // copies of the feature are visible, the popup appears
+        // over the copy being pointed to.
+        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+            coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+        }
 
-  // Change the cursor to a pointer when the mouse is over the places layer.
-  map.on('mouseenter', iconid, function () {
-      map.getCanvas().style.cursor = 'pointer';
-  });
+        new mapboxgl.Popup()
+            .setLngLat(coordinates)
+            .setHTML(description)
+            .addTo(map);
+    });
 
-  // Change it back to a pointer when it leaves.
-  map.on('mouseleave', iconid, function () {
-      map.getCanvas().style.cursor = '';
-  });
+    // Change the cursor to a pointer when the mouse is over the places layer.
+    map.on('mouseenter', iconid, function () {
+        map.getCanvas().style.cursor = 'pointer';
+    });
+
+    // Change it back to a pointer when it leaves.
+    map.on('mouseleave', iconid, function () {
+        map.getCanvas().style.cursor = '';
+    });
   }
+
+// Adds eachLayer to the overall layers array
 layers.push(eachLayer);
 }
 
 
-// Mapbox setup
-var geocoder = new MapboxGeocoder({
+// Sets up the search box in the map
+let geocoder = new MapboxGeocoder({
   accessToken: mapboxgl.accessToken
 });
 map.addControl(geocoder);
