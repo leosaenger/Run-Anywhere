@@ -26,7 +26,7 @@ let colors = [
   '#e74c3c'
 ];
 
-// letiable to make each ID unique
+// variable to make each ID unique
 let routeNum = 0;
 
 // Array that keeps track of the layers being added to the map so the layers can be hidden/shown
