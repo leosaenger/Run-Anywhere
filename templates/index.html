@@ -54,6 +54,8 @@
         var bin_id;
         // Remember selected_routes
         var selected_routes;
+        // Remember if a DataTable exists
+        var table;
         // Renders a mapbox map
         mapboxgl.accessToken = 'pk.eyJ1IjoibGVvc2FlbmdlciIsImEiOiJjam9wOGVsczkwa2ZzM3FsMWQxdHc2NHZzIn0.2yb_-4yL8nlzA1eEFjDRKw';
         const map = new mapboxgl.Map({
@@ -94,8 +96,13 @@
 
               // Creates table
               var table = $('#routes_list').DataTable({
+                // Make sure to destroy the table if it exists
+                destroy: true,
                 processing: true,
+                // Display buttons
                 dom: 'Bfrtip',
+                paging: false,
+                // Initialize data
                 "data": data.data,
                 "columns": [
                   { "data": "name" },
@@ -112,7 +119,7 @@
                 buttons: [
                     {
                         text: 'Initialize Custom Route',
-                        action: function ( e, dt, node, config ) {
+                        action: function (e, dt, node, config) {
                             custom_route();
                         }
                     }
@@ -120,9 +127,9 @@
               });
 
               // Adds a button to the end of each row
-              $('#routes_list tbody').on( 'click', 'button', function () {
+              $('#routes_list tbody').on('click', 'button', function() {
                   // Initializes the data stored
-                  var data = table.row( $(this).parents('tr') ).data();
+                  var data = table.row($(this).parents('tr')).data();
 
                   // Stringify JSON to send to server
                   var data_str = JSON.stringify(data);
@@ -139,7 +146,7 @@
                         // Save our bin_id for current session
                         bin_id = response.id;
                         // Alert the user
-                        alert("1 route added to route builder");
+                        alert("1 route stored in route builder");
                       }
                     };
 
@@ -169,7 +176,7 @@
                             // Store our selected routes, for later use
                             selected_routes = JSON.parse(req_up.responseText).data;
                             // Alert user
-                            alert(selected_routes.length + "routes added to route builder");
+                            alert(selected_routes.length + " routes stored in route builder");
                           }
                         };
 
