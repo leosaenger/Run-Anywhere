@@ -19,17 +19,14 @@
         <button class="btn btn-primary" type="submit">Register</button>
     </form>
     <script>
-    //I got this javascript code from the TF walkthrough at Monday office hours
-    //document.querySelector('form').onsubmit = function(e) {
-      //  e.preventDefault();
-        //$.get("/check", {username: document.querySelector('input[name = username]').value}, function(response){
-          //  if(response){
-            //    document.querySelector('form').submit();
-          //  }
-            //else{
-            //    alert("That username is already in use!");
-            //}
-        //});
-    //};
+      document.querySelector('form').onsubmit = function(e) {
+        e.preventDefault();
+        $.get("/check", {username: document.querySelector('input[name = username]').value}, function(response){
+            if(response){
+                document.querySelector('form').submit();
+            }
+            else{
+                alert("That username is already in use!");
+            }
     </script>
 {% endblock %}
