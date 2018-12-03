@@ -576,11 +576,3 @@ window.onload = function displaylines() {
         handleNotifications(map, map.getCenter(), "Your browser doesn't support html5 geolocation");
     }
 }
-
-// Handles input from side button
-document.getElementById('listing-group').addEventListener('change', function(e) {
-    var handler = e.target.id;
-    if (e.target.checked && handler === 'showRoutes') {
-        console.log("huh");
-    }
-});
