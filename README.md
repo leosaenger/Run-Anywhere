@@ -1,8 +1,8 @@
 # Run Anywhere
 
-Run Anywhere is a web application that uses Strava’s API to let users see nearby popular segments and create custom running routes by stringing together nearby segments.
+Run Anywhere is a web application that uses [Strava’s API](http://developers.strava.com/docs/reference/) to let users see nearby popular segments and create custom running routes by stringing together nearby segments.
 
-This is the git repo for Run Anywhere. *You can find a live version of the project [here](https://run-anywhere.herokuapp.com).*
+This is the git repo for Run Anywhere. **You can find a live version of the project [here](https://run-anywhere.herokuapp.com).** *Note: due to some web browser’s security requirements and difficulty with obtaining a SSL certificate, the site may not work on your default web browser. Try Microsoft Edge or Firefox.*
 
 ## Installation
 
@@ -62,13 +62,13 @@ Visit http://127.0.0.1:5000/ in a browser and you should see the app.
 
 Run Anywhere is a web-based application that lets users design running routes based on the most popular running segments (short portions of runs usually between 100 meters and one mile) in their area. The application uses data from Strava, a service with which users can log their runs, to construct these routes.
 
-The application uses (jsonbin.io)[https://jsonbin.io/] to store user routes. *jsonbin.io is prone to infrequent short periods of downtimes.* It’s possible that one of those short downtimes might happen while grading this project, if so, please wait a short while for the site to come back online.
+The application uses [jsonbin.io](https://jsonbin.io/) to store user routes. **jsonbin.io is prone to infrequent short periods of downtime.** It’s possible that one of those short downtimes might happen while grading this project, if so, please wait a short while for the site to come back online.
 
 ### Getting Started and Creating Custom Routes
 
 After clicking “enter” on the splash page, users will see a map that displays the top Strava segments near their current location. The initial map also shows a route connecting all of the segments.
 
-Once he or she sees the map (see homepage.jpeg), the user can design a custom route near his or her current location using any number of the top nearby segments. To do so, first browse the routes in the table on the right side of the screen. Pertinent information about the route is included in the table, and users may click on the markers on the map for information about the segments. To add segments to the new custom route, simply click the “Add to route builder” button next to each segment that one would desire to run through. A popup box will appear to confirm that the user successfully added the segment. Once the user adds as many segments as he or she desires, he or she can click the “Initialize Custom Route” button at the top of the screen to create a custom route on the map that includes all of the chosen segments.
+Once he or she sees the map, the user can design a custom route near his or her current location using any number of the top nearby segments. To do so, first browse the routes in the table on the right side of the screen. Pertinent information about the route is included in the table, and users may click on the markers on the map for information about the segments. To add segments to the new custom route, simply click the “Add to route builder” button next to each segment that one would desire to run through. A popup box will appear to confirm that the user successfully added the segment. Once the user adds as many segments as he or she desires, he or she can click the “Initialize Custom Route” button at the top of the screen to create a custom route on the map that includes all of the chosen segments.
 
 ### Going to New Places
 
