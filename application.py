@@ -173,3 +173,13 @@ def logout():
 
     # Redirect user to login form
     return redirect("/")
+
+@app.route("/check", methods=["GET"])
+def check():
+    """Return true if username available, else false, in JSON format"""
+    username = request.args.get("username").lower()
+    rows = db.execute("SELECT username FROM users WHERE username = :u", u=username)
+    if len(username) >= 1 and len(rows) == 0:
+        return jsonify(True)
+    else:
+        return jsonify(False)
