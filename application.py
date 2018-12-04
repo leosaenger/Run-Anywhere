@@ -64,12 +64,12 @@ def get_coords():
     seg_data['data'] = []
     for n in range((len(data))):
         seg_data['data'].append({'name': data[n].name,
-                                    'avg_grade': data[n].avg_grade,
-                                    # We have to extract the elevation difference and distance from the returned object
-                                    'elev_difference': str(data[n].elev_difference.__dict__['_num']) + ' ' + str(data[n].elev_difference.__dict__['_unit']),
-                                    'distance': str(data[n].distance.__dict__['_num']) + ' ' + str(data[n].distance.__dict__['_unit']),
-                                    # Points are returned both backwards and coded as a polyline, so we fix that
-                                    'points': flip(polyline.decode(data[n].points))})
+                                'avg_grade': data[n].avg_grade,
+                                # We have to extract the elevation difference and distance from the returned object
+                                'elev_difference': str(data[n].elev_difference.__dict__['_num']) + ' ' + str(data[n].elev_difference.__dict__['_unit']),
+                                'distance': str(data[n].distance.__dict__['_num']) + ' ' + str(data[n].distance.__dict__['_unit']),
+                                # Points are returned both backwards and coded as a polyline, so we fix that
+                                'points': flip(polyline.decode(data[n].points))})
     # Then, return those
     return jsonify(seg_data)
 
