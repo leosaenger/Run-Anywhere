@@ -596,6 +596,7 @@ function save_route(bin)
   $.getJSON($SCRIPT_ROOT + '/save_route', {
     bin_store: bin,
   }, function(data) {
+    // Alerts user
     if (JSON.parse(data) == true) {
       bootbox.alert({
           message: "Custom route saved!",
@@ -625,8 +626,6 @@ function get_saved()
         if (req.readyState == XMLHttpRequest.DONE) {
           // Store our selected routes, for later use
           let selected_routes = JSON.parse(req.responseText).data;
-          console.log("flag 1");
-          console.log(selected_routes);
           // Alert user
           bootbox.alert({
               message: "Custom route loaded!",
