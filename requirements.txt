@@ -1,12 +1,10 @@
 # this is for Heroku and other servers.
 # Locally, you should pip install -r requirements.txt
 
-psycopg2>=2.5.1
 cs50
 Flask
 Flask-Session
 requests
-gpxpy
 urllib3
 polyline
 stravalib
