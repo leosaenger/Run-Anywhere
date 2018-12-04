@@ -1,5 +1,8 @@
-import os
+'''
+A webapp that enables users to create custom Strava routes and display them on a map.
+'''
 
+import os
 from cs50 import SQL
 from flask import Flask, flash, jsonify, redirect, render_template, request, session
 from flask_session import Session
@@ -18,10 +21,6 @@ import polyline
 
 # Data storage
 import json
-from units import LeafUnit
-
-def leafunit_reduce(self):
-    return LeafUnit, (self.specifier, self.is_si())
 
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -36,19 +35,20 @@ Session(app)
 db = SQL("sqlite:///runanywhere.db")
 
 @app.route("/")
-# @login_required
 def landing():
-    """Show landing page"""
+    # Show landing page
     return(render_template("splash.html"))
 
 @app.route("/map")
-# @login_required
 def map():
-    """Show landing page"""
+    # Show map page
     return(render_template("index.html"))
 
 @app.route("/get_routes", methods=["GET"])
 def get_coords():
+    # Takes coordinates from the user and returns a list of Strava routes
+    # Strava routes are returned as a JSON object, as detailed below
+
     # Fetch the current latitude and longitude
     currentlat = request.args.get('lat', 0, type=float)
     currentlong = request.args.get('long', 0, type=float)
@@ -75,7 +75,9 @@ def get_coords():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    """Register user"""
+    # Register user
+
+    # If user accessed via POST, as in submitting a form
     if request.method == "POST":
         # Checking for valid inputs
         if not request.form.get("username") or not request.form.get("password") or not request.form.get("confirmation"):
@@ -103,7 +105,8 @@ def register():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    """Log user in"""
+    # Log user in
+
     # Forget any user_id
     session.clear()
     # User reached route via POST (as by submitting a form via POST)
@@ -137,7 +140,7 @@ def login():
 
 @app.route("/logout")
 def logout():
-    """Log user out"""
+    # Log user out
 
     # Forget any user_id
     session.clear()

@@ -9,10 +9,8 @@ called routes.
 let bin_id;
 // Remember selected_routes
 let selected_routes;
-// Remember if a DataTable exists
-let table;
 
-// Dict of colors to iterate through
+// Dict of different colors to iterate through, for aesthetics
 let colors = [
   '#e74c3c',
   '#3498db',
@@ -50,6 +48,7 @@ map.addControl(new mapboxgl.GeolocateControl({
   trackUserLocation: true
 }));
 
+
 /*
 Takes in lat and long and draws nearby routes on a mapbox element using those two.
 Initializes a DataTable with route data.
@@ -61,9 +60,9 @@ function drawRoute(point1, point2)
   let eachLayer = [];
 
   // Whenever a user searches for routes in a new location it hides the layers that were displayed before
-  for(let i = 0; i < layers.length; i++)
+  for (let i = 0; i < layers.length; i++)
   {
-    for(let j = 0; j < layers[i].length; j++)
+    for (let j = 0; j < layers[i].length; j++)
     {
       map.setLayoutProperty(layers[i][j], 'visibility', 'none');
     }
@@ -98,15 +97,25 @@ function drawRoute(point1, point2)
           {
               "targets": -1,
               "data": null,
+              // Places Boostrap button in null row
               "defaultContent": "<button type='button' class='btn btn-secondary'>Add to route builder</button>"
           }
         ],
         buttons: [
+            // Initializes the custom route using custom_route();
             {
-                text: 'Initialize Custom Route',
-                action: function (e, dt, node, config) {
-                    custom_route();
-                }
+              text: 'Initialize Custom Route',
+              action: function (e, dt, node, config) {
+                custom_route();
+              }
+            },
+            // Clears the stored bin, allowing a second initialization
+            {
+              text: 'Clear Custom Route',
+              action: function (e, dt, node, config) {
+                bin_id = undefined;
+                selected_routes = undefined;
+              }
             }
         ]
       });
@@ -121,6 +130,7 @@ function drawRoute(point1, point2)
 
           // If we haven't done so, create a JSON bin
           if (!bin_id) {
+
             // Creates a JSON bin for our data, as per: https://jsonbin.io/api-reference/
             let req = new XMLHttpRequest();
 
@@ -389,9 +399,9 @@ function custom_route()
   let eachLayer = [];
 
   // Hides any layers that are currently being shown
-  for(let i = 0; i < layers.length; i++)
+  for (let i = 0; i < layers.length; i++)
   {
-    for(let j = 0; j < layers[i].length; j++)
+    for (let j = 0; j < layers[i].length; j++)
     {
       map.setLayoutProperty(layers[i][j], 'visibility', 'none');
     }
@@ -588,6 +598,7 @@ map.on('load', function() {
             "circle-color": "#007cbf"
         }
     });
+    
     // Listen for the `result` event from the MapboxGeocoder that is triggered when a user
     // makes a selection and add a symbol that matches the result.
     let lastGeocode = "";
@@ -604,6 +615,7 @@ map.on('load', function() {
 
 
 // Humanizes Error messages
+// As per: https://gearheart.io/blog/ow-to-add-html5-geolocation-to-your-web-app/
 function humanizeGeolocationErrorMsg(error) {
     switch(error.code) {
         case error.PERMISSION_DENIED:
