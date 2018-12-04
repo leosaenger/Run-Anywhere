@@ -20,23 +20,21 @@
     </form>
 
     <script>
-      document.querySelector('form').onsubmit = function(e) {
+    document.querySelector('form').onsubmit = function(e) {
         e.preventDefault();
-        $.get("/check", {username: document.querySelector('input[name = username]').value}, function(response) {
-          if (response) {
-            // Submit the form
-            document.querySelector('form').submit();
-          }
-          else {
-            // Alert the user
-            bootbox.alert({
-                message: "That username is already in use",
-                backdrop: true,
-                size: "small"
-            });
-          }
+        $.get("/check", {username: document.querySelector('input[name = username]').value}, function(response){
+            if(response){
+                document.querySelector('form').submit();
+            }
+            else{
+                //alert("That username is already in use!");
+                bootbox.alert({
+                    message: "That username is already in use",
+                    backdrop: true,
+                    size: "small"
+                });
+            }
         });
-
+    };
     </script>
-
 {% endblock %}
