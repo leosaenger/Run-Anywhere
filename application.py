@@ -39,10 +39,12 @@ def landing():
     # Show landing page
     return(render_template("splash.html"))
 
+
 @app.route("/map")
 def map():
     # Show map page
     return(render_template("index.html"))
+
 
 @app.route("/get_routes", methods=["GET"])
 def get_coords():
@@ -73,6 +75,7 @@ def get_coords():
     # Then, return those
     return jsonify(seg_data)
 
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     # Register user
@@ -102,6 +105,28 @@ def register():
         return redirect("/map")
     else:
         return render_template("register.html")
+
+@app.route('/save_route', methods=['GET'])
+def save_route():
+    # Get bin_id from GET request
+    bin_id = request.args.get('bin_store', 0)
+    print(bin_id)
+    if bin_id != 0:
+        # Add it to database
+        db.execute("UPDATE users SET route_bin = :b WHERE id = :i", b = bin_id, i = session["user_id"])
+        return jsonify(True)
+    else:
+        return jsonify(False)
+
+
+@app.route("/get_saved", methods=["GET"])
+def get_saved():
+    # Gets the bin that the user saved earlier
+    route_bin = db.execute("SELECT route_bin FROM users WHERE id = :i", i = session["user_id"])
+    print(route_bin[0]["route_bin"])
+    # Then, return it
+    return jsonify(route_bin[0]["route_bin"])
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -137,6 +162,7 @@ def login():
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("login.html")
+
 
 @app.route("/logout")
 def logout():

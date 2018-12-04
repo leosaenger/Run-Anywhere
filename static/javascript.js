@@ -111,10 +111,24 @@ function drawRoute(point1, point2)
             },
             // Clears the stored bin, allowing a second initialization
             {
-              text: 'Clear Custom Route',
+              text: 'Clear Route Memory',
               action: function (e, dt, node, config) {
                 bin_id = undefined;
                 selected_routes = undefined;
+              }
+            },
+            // Saves Route, if user logged in
+            {
+              text: 'Save Route',
+              action: function (e, dt, node, config) {
+                save_route(bin_id);
+              }
+            },
+            // Load saved route, if user logged in
+            {
+              text: 'Load Saved Route',
+              action: function (e, dt, node, config) {
+                get_saved();
               }
             }
         ]
@@ -571,6 +585,67 @@ function custom_route()
 layers.push(eachLayer);
 }
 
+/*
+Saves user routes to SQL database, if logged in
+*/
+function save_route(bin)
+{
+  let bin_store;
+  // Save user data in SQL database
+  // Uses AJAX to make a request
+  $.getJSON($SCRIPT_ROOT + '/save_route', {
+    bin_store: bin,
+  }, function(data) {
+    if (JSON.parse(data) == true) {
+      bootbox.alert({
+          message: "Custom route saved!",
+          backdrop: true,
+          size: 'small'
+      });
+    }
+  });
+}
+
+/*
+Get and display user route
+*/
+function get_saved()
+{
+  $.getJSON($SCRIPT_ROOT + '/get_saved', {
+  }, function(data) {
+    // Get bin data from get_saved
+    bin_id = data;
+
+    if (bin_id != null) {
+      // Creates a JSON bin for our data, as per: https://jsonbin.io/api-reference/
+      let req = new XMLHttpRequest();
+
+      // Response handler
+      req.onreadystatechange = () => {
+        if (req.readyState == XMLHttpRequest.DONE) {
+          // Store our selected routes, for later use
+          let selected_routes = JSON.parse(req.responseText).data;
+          console.log("flag 1");
+          console.log(selected_routes);
+          // Alert user
+          bootbox.alert({
+              message: "Custom route loaded!",
+              backdrop: true,
+              size: 'small'
+          });
+          // Display custom route
+          custom_route();
+        }
+      };
+
+      // Send data to server
+      req.open("GET", "https://api.jsonbin.io/b/" + bin_id, true);
+      req.setRequestHeader("secret-key", "$2a$10$h0anNYLQyYyV5eUvvyy7.uDFHPZAM21Gjt7vodG1sp27C.76DhRq.");
+      req.send();
+    }
+  });
+}
+
 
 // Sets up the search box in the map
 let geocoder = new MapboxGeocoder({
@@ -598,7 +673,7 @@ map.on('load', function() {
             "circle-color": "#007cbf"
         }
     });
-    
+
     // Listen for the `result` event from the MapboxGeocoder that is triggered when a user
     // makes a selection and add a symbol that matches the result.
     let lastGeocode = "";
