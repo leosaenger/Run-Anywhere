@@ -4,6 +4,7 @@ Creates DataTable each time a request is made that enables user customization of
 called routes.
 */
 
+// Avoid memory leaks
 'use strict';
 
 // Remember JSON Data storage
@@ -146,101 +147,10 @@ function drawRoute(point1, point2)
 
     // Adds a button to the end of each row
     $('#routes_list tbody').on('click', 'button', function() {
-        // Initializes the data stored
-        let data = table.row($(this).parents('tr')).data();
-
-        // Stringify JSON to send to server
-        let data_str = JSON.stringify(data);
-
-        // If we haven't done so, create a JSON bin
-        if (!bin_id) {
-
-          // Creates a JSON bin for our data, as per: https://jsonbin.io/api-reference/
-          let req_first = new XMLHttpRequest();
-
-          // Response handler
-          req_first.onreadystatechange = () => {
-            if (req_first.readyState == XMLHttpRequest.DONE) {
-              let response = JSON.parse(req_first.responseText);
-
-              // Save our bin_id for current session
-              bin_id = response.id;
-              // Alert the user
-              bootbox.alert({
-                  message: "1 route stored in routebuilder",
-                  backdrop: true,
-                  size: "small"
-              });
-            }
-          }
-
-          // Send data to server
-          req_first.open("POST", "https://api.jsonbin.io/b", true);
-          req_first.setRequestHeader("Content-type", "application/json");
-          req_first.setRequestHeader("secret-key", "$2a$10$h0anNYLQyYyV5eUvvyy7.uDFHPZAM21Gjt7vodG1sp27C.76DhRq.");
-          req_first.setRequestHeader("private", "true");
-          req_first.send(data_str);
-        }
-
-        // Else, update our bin to store our data
-        else {
-          // Creates a JSON bin for our data, as per: https://jsonbin.io/api-reference/
-          let req = new XMLHttpRequest();
-
-          // Response handler
-          req.onreadystatechange = () => {
-            if (req.readyState == XMLHttpRequest.DONE) {
-              let current_data = JSON.parse(req.responseText);
-
-              // Update our bin to have our new data too
-              let req_up = new XMLHttpRequest();
-
-              req_up.onreadystatechange = () => {
-                if (req_up.readyState == XMLHttpRequest.DONE) {
-                  // Store our selected routes, for later use
-                  selected_routes = JSON.parse(req_up.responseText).data;
-                  // Alert user
-                  bootbox.alert({
-                      message: selected_routes.length + " routes stored in route builder",
-                      backdrop: true,
-                      size: 'small'
-                  });
-                }
-              };
-
-              // Concatonates old and new JSON objects
-              let jsons = new Array();
-              // If there's only one list item, concatonate into a new object like so
-              if (current_data.hasOwnProperty('name')) {
-                jsons.push(current_data);
-                jsons.push(data);
-              }
-              // Else, we have to iterate through the already existing object first
-              else {
-                for (let n = 0; n < current_data.length; n++) {
-                  jsons.push(current_data[n]);
-                }
-                // Only after that can we add our end data
-                jsons.push(data);
-              }
-              // Finally, make this something we can handle
-              let new_str = JSON.stringify(jsons);
-
-              // Update bin
-              req_up.open("PUT", "https://api.jsonbin.io/b/" + bin_id, true);
-              req_up.setRequestHeader("Content-type", "application/json");
-              req_up.setRequestHeader("secret-key", "$2a$10$h0anNYLQyYyV5eUvvyy7.uDFHPZAM21Gjt7vodG1sp27C.76DhRq.");
-              req_up.setRequestHeader("versioning", "false");
-              req_up.send(new_str);
-
-            }
-          };
-
-          // Send data to server
-          req.open("GET", "https://api.jsonbin.io/b/" + bin_id, true);
-          req.setRequestHeader("secret-key", "$2a$10$h0anNYLQyYyV5eUvvyy7.uDFHPZAM21Gjt7vodG1sp27C.76DhRq.");
-          req.send();
-        }
+      // Initializes the data stored
+      let data = table.row($(this).parents('tr')).data();
+      // Call a function to process that data
+      add_to_store(data);
     });
 
     // Parse through the data
@@ -632,6 +542,7 @@ function save_route(bin)
   });
 }
 
+
 /*
 Get and display user route
 */
@@ -675,6 +586,109 @@ function get_saved()
       });
     }
   });
+}
+
+/*
+Adds user data to a JSON bin
+*/
+function add_to_store(data)
+{
+  if (data == undefined) {
+    return;
+  }
+  else {
+        // Stringify JSON to send to server
+    let data_str = JSON.stringify(data);
+
+    // If we haven't done so, create a JSON bin
+    if (!bin_id) {
+      // Creates a JSON bin for our data, as per: https://jsonbin.io/api-reference/
+      let req_first = new XMLHttpRequest();
+
+      // Response handler
+      req_first.onreadystatechange = () => {
+        if (req_first.readyState == XMLHttpRequest.DONE) {
+          let response = JSON.parse(req_first.responseText);
+
+          // Save our bin_id for current session
+          bin_id = response.id;
+          // Alert the user
+          bootbox.alert({
+              message: "1 route stored in routebuilder",
+              backdrop: true,
+              size: "small"
+          });
+        }
+      }
+
+      // Send data to server
+      req_first.open("POST", "https://api.jsonbin.io/b", true);
+      req_first.setRequestHeader("Content-type", "application/json");
+      req_first.setRequestHeader("secret-key", "$2a$10$h0anNYLQyYyV5eUvvyy7.uDFHPZAM21Gjt7vodG1sp27C.76DhRq.");
+      req_first.setRequestHeader("private", "true");
+      req_first.send(data_str);
+    }
+
+    // Else, update our bin to store our data
+    else {
+      // Creates a JSON bin for our data, as per: https://jsonbin.io/api-reference/
+      let req = new XMLHttpRequest();
+
+      // Response handler
+      req.onreadystatechange = () => {
+        if (req.readyState == XMLHttpRequest.DONE) {
+          let current_data = JSON.parse(req.responseText);
+
+          // Update our bin to have our new data too
+          let req_up = new XMLHttpRequest();
+
+          req_up.onreadystatechange = () => {
+            if (req_up.readyState == XMLHttpRequest.DONE) {
+              // Store our selected routes, for later use
+              selected_routes = JSON.parse(req_up.responseText).data;
+              // Alert user
+              bootbox.alert({
+                  message: selected_routes.length + " routes stored in route builder",
+                  backdrop: true,
+                  size: 'small'
+              });
+            }
+          };
+
+          // Concatonates old and new JSON objects
+          let jsons = new Array();
+          // If there's only one list item, concatonate into a new object like so
+          if (current_data.hasOwnProperty('name')) {
+            jsons.push(current_data);
+            jsons.push(data);
+          }
+          // Else, we have to iterate through the already existing object first
+          else {
+            for (let n = 0; n < current_data.length; n++) {
+              jsons.push(current_data[n]);
+            }
+            // Only after that can we add our end data
+            jsons.push(data);
+          }
+          // Finally, make this something we can handle
+          let new_str = JSON.stringify(jsons);
+
+          // Update bin
+          req_up.open("PUT", "https://api.jsonbin.io/b/" + bin_id, true);
+          req_up.setRequestHeader("Content-type", "application/json");
+          req_up.setRequestHeader("secret-key", "$2a$10$h0anNYLQyYyV5eUvvyy7.uDFHPZAM21Gjt7vodG1sp27C.76DhRq.");
+          req_up.setRequestHeader("versioning", "false");
+          req_up.send(new_str);
+
+        }
+      };
+
+      // Send data to server
+      req.open("GET", "https://api.jsonbin.io/b/" + bin_id, true);
+      req.setRequestHeader("secret-key", "$2a$10$h0anNYLQyYyV5eUvvyy7.uDFHPZAM21Gjt7vodG1sp27C.76DhRq.");
+      req.send();
+    }
+  }
 }
 
 
