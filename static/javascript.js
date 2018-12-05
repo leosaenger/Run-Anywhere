@@ -4,6 +4,8 @@ Creates DataTable each time a request is made that enables user customization of
 called routes.
 */
 
+'use strict';
+
 // Remember JSON Data storage
 // See: https://jsonbin.io/api-reference
 let bin_id;
@@ -55,9 +57,6 @@ Initializes a DataTable with route data.
 */
 function drawRoute(point1, point2)
 {
-  req_first = undefined;
-  bin_id = undefined;
-  data_str = undefined;
   // Array that contains the layers being added to the map from each drawRoute calle
   // this array is then added to the "layers" array
   let eachLayer = [];
@@ -121,7 +120,18 @@ function drawRoute(point1, point2)
           {
             text: 'Save Route',
             action: function (e, dt, node, config) {
-              save_route(bin_id);
+              // Check if stored bin_id
+              if (bin_id) {
+                save_route(bin_id);
+              }
+              // Else, the user must not have saved a route yet
+              else {
+                bootbox.alert({
+                    message: "You must create a route first",
+                    backdrop: true,
+                    size: "small"
+                });
+              }
             }
           },
           // Load saved route, if user logged in
@@ -151,7 +161,7 @@ function drawRoute(point1, point2)
           // Response handler
           req_first.onreadystatechange = () => {
             if (req_first.readyState == XMLHttpRequest.DONE) {
-              response = JSON.parse(req_first.responseText);
+              let response = JSON.parse(req_first.responseText);
 
               // Save our bin_id for current session
               bin_id = response.id;
@@ -180,7 +190,7 @@ function drawRoute(point1, point2)
           // Response handler
           req.onreadystatechange = () => {
             if (req.readyState == XMLHttpRequest.DONE) {
-              current_data = JSON.parse(req.responseText);
+              let current_data = JSON.parse(req.responseText);
 
               // Update our bin to have our new data too
               let req_up = new XMLHttpRequest();
@@ -405,183 +415,192 @@ user input and strings together routes that have been selected.
 */
 function custom_route()
 {
-  // Variable to store the routes that have been selected
-  let routes_list = selected_routes;
+  if (selected_routes) {
+    // Variable to store the routes that have been selected
+    let custom_routes = selected_routes;
 
-  // Array to store the layers being added to hide them later
-  let eachLayer = [];
+    // Array to store the layers being added to hide them later
+    let eachLayer = [];
 
-  // Hides any layers that are currently being shown
-  for (let i = 0; i < layers.length; i++)
-  {
-    for (let j = 0; j < layers[i].length; j++)
+    // Hides any layers that are currently being shown
+    for (let i = 0; i < layers.length; i++)
     {
-      map.setLayoutProperty(layers[i][j], 'visibility', 'none');
-    }
-  }
-
-  // Parse through the data
-  for (let i = 0; i < routes_list.length; i++) {
-    // Variables to store data about the routes
-    let name = routes_list[i].name;
-    let avg_grade = routes_list[i].avg_grade;
-    let elev_difference = routes_list[i].elev_difference;
-    let distance = routes_list[i].distance;
-
-    // An array that stores the points in the route
-    let coords = []
-    for (let j = 0; j < routes_list.length; j++) {
-      coords.push(routes_list[j].points);
+      for (let j = 0; j < layers[i].length; j++)
+      {
+        map.setLayoutProperty(layers[i][j], 'visibility', 'none');
+      }
     }
 
-    // Give each route a unique id
-    let id = "route" + routeNum;
+    // Parse through the data
+    for (let i = 0; i < custom_routes.length; i++) {
+      // Variables to store data about the routes
+      let name = custom_routes[i].name;
+      let avg_grade = custom_routes[i].avg_grade;
+      let elev_difference = custom_routes[i].elev_difference;
+      let distance = custom_routes[i].distance;
 
-    // Keep track of start lat and long, for connecting routes
-    let lat1 = coords[i][0][0];
-    let long1 = coords[i][0][1];
+      // An array that stores the points in the route
+      let coords = []
+      for (let j = 0; j < custom_routes.length; j++) {
+        coords.push(custom_routes[j].points);
+      }
 
-    // increment routeNum to make each id unique
-    routeNum++;
+      // Give each route a unique id
+      let id = "route" + routeNum;
 
-    // Map each coordinate set
-    map.addLayer({
-        "id": id,
-        "type": "line",
+      // Keep track of start lat and long, for connecting routes
+      let lat1 = coords[i][0][0];
+      let long1 = coords[i][0][1];
+
+      // increment routeNum to make each id unique
+      routeNum++;
+
+      // Map each coordinate set
+      map.addLayer({
+          "id": id,
+          "type": "line",
+          "source": {
+              "type": "geojson",
+              "data": {
+                  "type": "Feature",
+                  "properties": {},
+                  "geometry": {
+                      "type": "LineString",
+                      "coordinates": coords[i]
+                  }
+              }
+          },
+          "layout": {
+              "line-join": "round",
+              "line-cap": "round"
+          },
+          "paint": {
+              "line-color": colors[i],
+              "line-width": 4
+          }
+      });
+
+      // Adds the layer's id to eachLayer array
+      eachLayer.push(id);
+
+      // Set the opacity a bit lower
+      map.setPaintProperty(id, 'line-opacity', 70 / 100);
+
+      // Connects the end of a route to the start of the next route
+      if (i != 0) {
+        // Define needed data for connecting
+        let lenpast = coords[i-1].length - 1;
+        let endlat = coords[i][0][0];
+        let endlong = coords[i][0][1];
+        let startlat = coords[i-1][lenpast][0];
+        let startlong = coords[i-1][lenpast][1];
+        let routename = 'routeconnect' + routeNum;
+
+        // Get the connector
+        let directionsRequest = 'https://api.mapbox.com/directions/v5/mapbox/walking/' + startlat + ',' + startlong + ';' + endlat + ',' + endlong + '?geometries=geojson&access_token=' + mapboxgl.accessToken;
+
+        // AJAX the route data from mapbox
+        $.ajax({
+          method: 'GET',
+          url: directionsRequest,
+        }).done(function(data) {
+          // Display the route between each
+          let route = data.routes[0].geometry;
+          map.addLayer({
+            id: routename,
+            type: 'line',
+            source: {
+              type: 'geojson',
+              data: {
+                type: 'Feature',
+                geometry: route
+              }
+            },
+            paint: {
+              'line-width': 2
+            }
+          });
+
+          // Adds routename into the eachLayer arrray
+          eachLayer.push(routename);
+        });
+      }
+
+      // Give each icon a unique id
+      let iconid = "places" + routeNum;
+
+      // Adds icons to the start of each route
+      map.addLayer({
+        "id": iconid,
+        "type": "symbol",
         "source": {
             "type": "geojson",
             "data": {
-                "type": "Feature",
-                "properties": {},
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": coords[i]
-                }
+                "type": "FeatureCollection",
+                "features": [{
+                    "type": "Feature",
+                    "properties": {
+                        "description": '<h5>' + name + '</h5><p>' +
+                                'Elevation Difference: ' + elev_difference + '</p><p>' +
+                                'Distance: ' + distance + '</p><p>'+
+                                'Average Grade: ' + avg_grade + '</p>',
+                        "icon": "marker"
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [lat1, long1]
+                    }
+                }]
             }
         },
         "layout": {
-            "line-join": "round",
-            "line-cap": "round"
-        },
-        "paint": {
-            "line-color": colors[i],
-            "line-width": 4
+            "icon-image": "{icon}-15",
+            "icon-allow-overlap": true
         }
-    });
+      });
 
-    // Adds the layer's id to eachLayer array
-    eachLayer.push(id);
+      // Adds iconid into the eachLayer array
+      eachLayer.push(iconid);
 
-    // Set the opacity a bit lower
-    map.setPaintProperty(id, 'line-opacity', 70 / 100);
+      // When an icon is clicked it displays a popup with information about the route
+      map.on('click', iconid, function (e) {
+          let coordinates = e.features[0].geometry.coordinates.slice();
+          let description = e.features[0].properties.description;
 
-    // Connects the end of a route to the start of the next route
-    if (i != 0) {
-      // Define needed data for connecting
-      let lenpast = coords[i-1].length - 1;
-      let endlat = coords[i][0][0];
-      let endlong = coords[i][0][1];
-      let startlat = coords[i-1][lenpast][0];
-      let startlong = coords[i-1][lenpast][1];
-      let routename = 'routeconnect' + routeNum;
-
-      // Get the connector
-      let directionsRequest = 'https://api.mapbox.com/directions/v5/mapbox/walking/' + startlat + ',' + startlong + ';' + endlat + ',' + endlong + '?geometries=geojson&access_token=' + mapboxgl.accessToken;
-
-      // AJAX the route data from mapbox
-      $.ajax({
-        method: 'GET',
-        url: directionsRequest,
-      }).done(function(data) {
-        // Display the route between each
-        let route = data.routes[0].geometry;
-        map.addLayer({
-          id: routename,
-          type: 'line',
-          source: {
-            type: 'geojson',
-            data: {
-              type: 'Feature',
-              geometry: route
-            }
-          },
-          paint: {
-            'line-width': 2
+          // Ensure that if the map is zoomed out such that multiple
+          // copies of the feature are visible, the popup appears
+          // over the copy being pointed to.
+          while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+              coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
           }
-        });
 
-        // Adds routename into the eachLayer arrray
-        eachLayer.push(routename);
+          new mapboxgl.Popup()
+              .setLngLat(coordinates)
+              .setHTML(description)
+              .addTo(map);
+      });
+
+      // Change the cursor to a pointer when the mouse is over the places layer.
+      map.on('mouseenter', iconid, function () {
+          map.getCanvas().style.cursor = 'pointer';
+      });
+
+      // Change it back to a pointer when it leaves.
+      map.on('mouseleave', iconid, function () {
+          map.getCanvas().style.cursor = '';
       });
     }
-
-    // Give each icon a unique id
-    let iconid = "places" + routeNum;
-
-    // Adds icons to the start of each route
-    map.addLayer({
-      "id": iconid,
-      "type": "symbol",
-      "source": {
-          "type": "geojson",
-          "data": {
-              "type": "FeatureCollection",
-              "features": [{
-                  "type": "Feature",
-                  "properties": {
-                      "description": '<h5>' + name + '</h5><p>' +
-                              'Elevation Difference: ' + elev_difference + '</p><p>' +
-                              'Distance: ' + distance + '</p><p>'+
-                              'Average Grade: ' + avg_grade + '</p>',
-                      "icon": "marker"
-                  },
-                  "geometry": {
-                      "type": "Point",
-                      "coordinates": [lat1, long1]
-                  }
-              }]
-          }
-      },
-      "layout": {
-          "icon-image": "{icon}-15",
-          "icon-allow-overlap": true
-      }
-    });
-
-    // Adds iconid into the eachLayer array
-    eachLayer.push(iconid);
-
-    // When an icon is clicked it displays a popup with information about the route
-    map.on('click', iconid, function (e) {
-        let coordinates = e.features[0].geometry.coordinates.slice();
-        let description = e.features[0].properties.description;
-
-        // Ensure that if the map is zoomed out such that multiple
-        // copies of the feature are visible, the popup appears
-        // over the copy being pointed to.
-        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-            coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-        }
-
-        new mapboxgl.Popup()
-            .setLngLat(coordinates)
-            .setHTML(description)
-            .addTo(map);
-    });
-
-    // Change the cursor to a pointer when the mouse is over the places layer.
-    map.on('mouseenter', iconid, function () {
-        map.getCanvas().style.cursor = 'pointer';
-    });
-
-    // Change it back to a pointer when it leaves.
-    map.on('mouseleave', iconid, function () {
-        map.getCanvas().style.cursor = '';
+  // Adds eachLayer to the overall layers array
+  layers.push(eachLayer);
+  }
+  else {
+    // User hasn't selected any routes
+    bootbox.alert({
+        message: "You must select routes you want to display first",
+        backdrop: true,
+        size: 'small'
     });
   }
-
-// Adds eachLayer to the overall layers array
-layers.push(eachLayer);
 }
 
 /*
@@ -603,6 +622,13 @@ function save_route(bin)
           size: 'small'
       });
     }
+    else {
+      bootbox.alert({
+          message: "Saving route failed -- are you sure you're logged in?",
+          backdrop: true,
+          size: 'small'
+      });
+    }
   });
 }
 
@@ -616,7 +642,7 @@ function get_saved()
     // Get bin data from get_saved
     bin_id = data;
 
-    if (bin_id != null) {
+    if (bin_id != false) {
       // Creates a JSON bin for our data, as per: https://jsonbin.io/api-reference/
       let req = new XMLHttpRequest();
 
@@ -640,6 +666,13 @@ function get_saved()
       req.open("GET", "https://api.jsonbin.io/b/" + bin_id, true);
       req.setRequestHeader("secret-key", "$2a$10$h0anNYLQyYyV5eUvvyy7.uDFHPZAM21Gjt7vodG1sp27C.76DhRq.");
       req.send();
+    }
+    else {
+      bootbox.alert({
+          message: "No data found for user. Check to make sure you're logged in and have saved a route",
+          backdrop: true,
+          size: "small"
+      });
     }
   });
 }

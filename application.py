@@ -110,23 +110,29 @@ def register():
 def save_route():
     # Get bin_id from GET request
     bin_id = request.args.get('bin_store', 0)
-    print(bin_id)
-    if bin_id != 0:
-        # Add it to database
-        db.execute("UPDATE users SET route_bin = :b WHERE id = :i", b = bin_id, i = session["user_id"])
-        return jsonify(True)
-    else:
+    try:
+        if bin_id != 0:
+            # Add it to database
+            db.execute("UPDATE users SET route_bin = :b WHERE id = :i", b = bin_id, i = session["user_id"])
+            return jsonify(True)
+        else:
+            # The bin must not exist
+            return jsonify(False)
+    except KeyError:
+        # If the user hasn't logged in
         return jsonify(False)
 
 
 @app.route("/get_saved", methods=["GET"])
 def get_saved():
-    # Gets the bin that the user saved earlier
-    route_bin = db.execute("SELECT route_bin FROM users WHERE id = :i", i = session["user_id"])
-    print(route_bin[0]["route_bin"])
-    # Then, return it
-    return jsonify(route_bin[0]["route_bin"])
-
+    try:
+        # Gets the bin that the user saved earlier
+        route_bin = db.execute("SELECT route_bin FROM users WHERE id = :i", i = session["user_id"])
+        # Then, return it
+        return jsonify(route_bin[0]["route_bin"])
+    except KeyError:
+        # If the user hasn't logged in, we'll get a KeyError
+        return jsonify(False)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
