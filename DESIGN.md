@@ -1,6 +1,6 @@
 # Overview
 
-Much of the front end of our project was implemented using Mapbox’s API. To use any of Mapbox’s features, we had to get an access token, which had to be given in all of the javascript functions relating to Mapbox. While some features use Mapbox templates manipulated for our specific use - such as `geocontrol` which allows users to search for a location - the `drawRoute`, `custom_route`, and `add_to_store` functions were the most complex and written almost entirely in original JavaScript.
+Much of the front end of our project was implemented using Mapbox’s API. To use any of Mapbox’s features, we had to get an access token, which had to be given in all of the javascript functions relating to Mapbox. While some features use Mapbox templates manipulated for our specific use - such as `geocontrol` which allows users to search for a location - the `drawRoute` and `custom_route` functions were the most complex functions written almost entirely in original JavaScript.
 
 ## drawRoute
 
@@ -56,6 +56,16 @@ Then an AJAX request is made with what is returned from the API, therefore addin
 Icons are added after the connecting routes. This is done by again feeding a geoJSON to Mapbox, allowing them to add an icon layer. This geoJSON contains information about the specific route in its “properties”.
 
 After the layer is added, some mouse functionality is implemented so that when the icon is clicked, a popup appears which will display the information that was provided in the “properties” of the icon. There are two other functions which make it so that the appearance of the mouse makes it apparent that the icon can me clicked - just like a mouse changes when hovering over a link.
+
+## Custom Route Construction
+
+Much of `custom_route` is detailed above, but in essence it parses through the `selected_routes` object refreshed after each jsonbin.io call and uses it to display and link selected routes on the Mapbox map, similar to the implementation of that same function within `drawRoutes`.
+
+## Helper Functions
+
+### `get_segments`
+
+`get_segments` uses [stravalib](https://pythonhosted.org/stravalib), a python library, to interact with Strava’s API. Stravalib is relatively easy to use and returns “strongly-typed” model objects, which are much easier to handle and parse through than Strava’s native API, which often returns irregular data. Strava’s native API is also poorly documented, which caused a lot of frustration when working with it that was avoided by using stravalib (for example, Strava’s API documentation defines many functions as written in CamelCase, but in actuality has them defined as underscored_functions).
 
 ### Flip
 
