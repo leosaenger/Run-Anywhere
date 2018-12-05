@@ -55,6 +55,9 @@ Initializes a DataTable with route data.
 */
 function drawRoute(point1, point2)
 {
+  req_first = undefined;
+  bin_id = undefined;
+  data_str = undefined;
   // Array that contains the layers being added to the map from each drawRoute calle
   // this array is then added to the "layers" array
   let eachLayer = [];
@@ -75,164 +78,160 @@ function drawRoute(point1, point2)
   }, function(data) {
     let routes_list = data;
 
-    // Initialize a table with the data, using an anonymous function
-    (function(){
-
-      // Creates table
-      let table = $('#routes_list').DataTable({
-        // Make sure to destroy the table if it exists
-        destroy: true,
-        processing: true,
-        // Display buttons
-        dom: 'Bfrtip',
-        paging: false,
-        // Initialize data
-        "data": data.data,
-        "columns": [
-          { "data": "name" },
-          { "data": "avg_grade" },
-          { "data": "elev_difference" },
-          { "data": "distance" },
-          // Adds an extra null row to the end
+    // Creates table
+    let table = $('#routes_list').DataTable({
+      // Make sure to destroy the table if it exists
+      destroy: true,
+      processing: true,
+      // Display buttons
+      dom: 'Bfrtip',
+      paging: false,
+      // Initialize data
+      "data": data.data,
+      "columns": [
+        { "data": "name" },
+        { "data": "avg_grade" },
+        { "data": "elev_difference" },
+        { "data": "distance" },
+        // Adds an extra null row to the end
+        {
+            "targets": -1,
+            "data": null,
+            // Places Boostrap button in null row
+            "defaultContent": "<button type='button' class='btn btn-secondary'>Add to route builder</button>"
+        }
+      ],
+      buttons: [
+          // Initializes the custom route using custom_route();
           {
-              "targets": -1,
-              "data": null,
-              // Places Boostrap button in null row
-              "defaultContent": "<button type='button' class='btn btn-secondary'>Add to route builder</button>"
-          }
-        ],
-        buttons: [
-            // Initializes the custom route using custom_route();
-            {
-              text: 'Initialize Custom Route',
-              action: function (e, dt, node, config) {
-                custom_route();
-              }
-            },
-            // Clears the stored bin, allowing a second initialization
-            {
-              text: 'Clear Route Memory',
-              action: function (e, dt, node, config) {
-                bin_id = undefined;
-                selected_routes = undefined;
-              }
-            },
-            // Saves Route, if user logged in
-            {
-              text: 'Save Route',
-              action: function (e, dt, node, config) {
-                save_route(bin_id);
-              }
-            },
-            // Load saved route, if user logged in
-            {
-              text: 'Load Saved Route',
-              action: function (e, dt, node, config) {
-                get_saved();
-              }
+            text: 'Initialize Custom Route',
+            action: function (e, dt, node, config) {
+              custom_route();
             }
-        ]
-      });
+          },
+          // Clears the stored bin, allowing a second initialization
+          {
+            text: 'Clear Route Memory',
+            action: function (e, dt, node, config) {
+              bin_id = undefined;
+              selected_routes = undefined;
+            }
+          },
+          // Saves Route, if user logged in
+          {
+            text: 'Save Route',
+            action: function (e, dt, node, config) {
+              save_route(bin_id);
+            }
+          },
+          // Load saved route, if user logged in
+          {
+            text: 'Load Saved Route',
+            action: function (e, dt, node, config) {
+              get_saved();
+            }
+          }
+      ]
+    });
 
-      // Adds a button to the end of each row
-      $('#routes_list tbody').on('click', 'button', function() {
-          // Initializes the data stored
-          let data = table.row($(this).parents('tr')).data();
+    // Adds a button to the end of each row
+    $('#routes_list tbody').on('click', 'button', function() {
+        // Initializes the data stored
+        let data = table.row($(this).parents('tr')).data();
 
-          // Stringify JSON to send to server
-          let data_str = JSON.stringify(data);
+        // Stringify JSON to send to server
+        let data_str = JSON.stringify(data);
 
-          // If we haven't done so, create a JSON bin
-          if (!bin_id) {
+        // If we haven't done so, create a JSON bin
+        if (!bin_id) {
 
-            // Creates a JSON bin for our data, as per: https://jsonbin.io/api-reference/
-            let req = new XMLHttpRequest();
+          // Creates a JSON bin for our data, as per: https://jsonbin.io/api-reference/
+          let req_first = new XMLHttpRequest();
 
-            // Response handler
-            req.onreadystatechange = () => {
-              if (req.readyState == XMLHttpRequest.DONE) {
-                response = JSON.parse(req.responseText);
-                // Save our bin_id for current session
-                bin_id = response.id;
-                // Alert the user
-                bootbox.alert({
-                    message: "1 route stored in routebuilder",
-                    backdrop: true,
-                    size: "small"
-                });
-              }
-            };
+          // Response handler
+          req_first.onreadystatechange = () => {
+            if (req_first.readyState == XMLHttpRequest.DONE) {
+              response = JSON.parse(req_first.responseText);
 
-            // Send data to server
-            req.open("POST", "https://api.jsonbin.io/b", true);
-            req.setRequestHeader("Content-type", "application/json");
-            req.setRequestHeader("secret-key", "$2a$10$h0anNYLQyYyV5eUvvyy7.uDFHPZAM21Gjt7vodG1sp27C.76DhRq.");
-            req.setRequestHeader("private", "true");
-            req.send(data_str);
+              // Save our bin_id for current session
+              bin_id = response.id;
+              // Alert the user
+              bootbox.alert({
+                  message: "1 route stored in routebuilder",
+                  backdrop: true,
+                  size: "small"
+              });
+            }
           }
 
-          // Else, update our bin to store our data
-          else {
-            // Creates a JSON bin for our data, as per: https://jsonbin.io/api-reference/
-            let req = new XMLHttpRequest();
+          // Send data to server
+          req_first.open("POST", "https://api.jsonbin.io/b", true);
+          req_first.setRequestHeader("Content-type", "application/json");
+          req_first.setRequestHeader("secret-key", "$2a$10$h0anNYLQyYyV5eUvvyy7.uDFHPZAM21Gjt7vodG1sp27C.76DhRq.");
+          req_first.setRequestHeader("private", "true");
+          req_first.send(data_str);
+        }
 
-            // Response handler
-            req.onreadystatechange = () => {
-              if (req.readyState == XMLHttpRequest.DONE) {
-                current_data = JSON.parse(req.responseText);
+        // Else, update our bin to store our data
+        else {
+          // Creates a JSON bin for our data, as per: https://jsonbin.io/api-reference/
+          let req = new XMLHttpRequest();
 
-                // Update our bin to have our new data too
-                let req_up = new XMLHttpRequest();
+          // Response handler
+          req.onreadystatechange = () => {
+            if (req.readyState == XMLHttpRequest.DONE) {
+              current_data = JSON.parse(req.responseText);
 
-                req_up.onreadystatechange = () => {
-                  if (req_up.readyState == XMLHttpRequest.DONE) {
-                    // Store our selected routes, for later use
-                    selected_routes = JSON.parse(req_up.responseText).data;
-                    // Alert user
-                    bootbox.alert({
-                        message: selected_routes.length + " routes stored in route builder",
-                        backdrop: true,
-                        size: 'small'
-                    });
-                  }
-                };
+              // Update our bin to have our new data too
+              let req_up = new XMLHttpRequest();
 
-                // Concatonates old and new JSON objects
-                let jsons = new Array();
-                // If there's only one list item, concatonate into a new object like so
-                if (current_data.hasOwnProperty('name')) {
-                  jsons.push(current_data);
-                  jsons.push(data);
+              req_up.onreadystatechange = () => {
+                if (req_up.readyState == XMLHttpRequest.DONE) {
+                  // Store our selected routes, for later use
+                  selected_routes = JSON.parse(req_up.responseText).data;
+                  // Alert user
+                  bootbox.alert({
+                      message: selected_routes.length + " routes stored in route builder",
+                      backdrop: true,
+                      size: 'small'
+                  });
                 }
-                // Else, we have to iterate through the already existing object first
-                else {
-                  for (let n = 0; n < current_data.length; n++) {
-                    jsons.push(current_data[n]);
-                  }
-                  // Only after that can we add our end data
-                  jsons.push(data);
-                }
-                // Finally, make this something we can handle
-                let new_str = JSON.stringify(jsons);
+              };
 
-                // Update bin
-                req_up.open("PUT", "https://api.jsonbin.io/b/" + bin_id, true);
-                req_up.setRequestHeader("Content-type", "application/json");
-                req_up.setRequestHeader("secret-key", "$2a$10$h0anNYLQyYyV5eUvvyy7.uDFHPZAM21Gjt7vodG1sp27C.76DhRq.");
-                req_up.setRequestHeader("versioning", "false");
-                req_up.send(new_str);
-
+              // Concatonates old and new JSON objects
+              let jsons = new Array();
+              // If there's only one list item, concatonate into a new object like so
+              if (current_data.hasOwnProperty('name')) {
+                jsons.push(current_data);
+                jsons.push(data);
               }
-            };
+              // Else, we have to iterate through the already existing object first
+              else {
+                for (let n = 0; n < current_data.length; n++) {
+                  jsons.push(current_data[n]);
+                }
+                // Only after that can we add our end data
+                jsons.push(data);
+              }
+              // Finally, make this something we can handle
+              let new_str = JSON.stringify(jsons);
 
-            // Send data to server
-            req.open("GET", "https://api.jsonbin.io/b/" + bin_id, true);
-            req.setRequestHeader("secret-key", "$2a$10$h0anNYLQyYyV5eUvvyy7.uDFHPZAM21Gjt7vodG1sp27C.76DhRq.");
-            req.send();
-          }
-      });
+              // Update bin
+              req_up.open("PUT", "https://api.jsonbin.io/b/" + bin_id, true);
+              req_up.setRequestHeader("Content-type", "application/json");
+              req_up.setRequestHeader("secret-key", "$2a$10$h0anNYLQyYyV5eUvvyy7.uDFHPZAM21Gjt7vodG1sp27C.76DhRq.");
+              req_up.setRequestHeader("versioning", "false");
+              req_up.send(new_str);
 
-    })();
+            }
+          };
+
+          // Send data to server
+          req.open("GET", "https://api.jsonbin.io/b/" + bin_id, true);
+          req.setRequestHeader("secret-key", "$2a$10$h0anNYLQyYyV5eUvvyy7.uDFHPZAM21Gjt7vodG1sp27C.76DhRq.");
+          req.send();
+        }
+    });
 
     // Parse through the data
     for (let i = 0; i < routes_list.data.length; i++) {
