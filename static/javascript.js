@@ -589,13 +589,20 @@ function get_saved()
 }
 
 /*
-Adds user data to a JSON bin
+Adds user data to a JSON bin, or updates an already
+existing bin with additional user data
 */
 function add_to_store(data)
 {
+  // Check to ensure the data passed exists
+  // This is necessary since re-calling drawRoute, as in when moving locations,
+  // can occasionally cause a "phantom reference" on some web browsers to simultaneously
+  // push an empty array of data, as in an incorrect reference to an already cleared DataTable
   if (data == undefined) {
+    // We should just ignore those calls
     return;
   }
+  // Else, the function must have executed correctly
   else {
         // Stringify JSON to send to server
     let data_str = JSON.stringify(data);
