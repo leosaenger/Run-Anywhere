@@ -1,8 +1,8 @@
 # Run Anywhere
 
-Run Anywhere is a web application that uses [Strava’s API](http://developers.strava.com/docs/reference/) to let users see nearby popular segments and create custom running routes by stringing together nearby segments.
+Run Anywhere is a web application that uses [Strava’s API](http://developers.strava.com/docs/reference/) to let users browse nearby popular running segments and use them to create and save custom running routes.
 
-This is the git repo for Run Anywhere. **You can find a live version of the project [here](https://run-anywhere.herokuapp.com).** *Note: due to some web browser’s security requirements and difficulty with obtaining a SSL certificate, the site may not work on your default web browser. Try Microsoft Edge or Firefox.*
+This is the git repo for Run Anywhere. **You can find a live version of the project [here](https://run-anywhere.herokuapp.com).** *Note: due to some web browser’s security requirements and difficulty with obtaining a SSL certificate, the site may not work on your default web browser. Try Microsoft Edge or Firefox and ensure you're visiting via https.*
 
 ## Installation
 
